@@ -1,0 +1,7 @@
+OpenGL3D/Debug/
+OpenGL3D/Release/
+Debug/
+Release/
+*.suo
+*.sdf
+*.opensdf
