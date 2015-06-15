@@ -7,83 +7,57 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-ShadowBuffer::ShadowBuffer(int width, int height)
+ShadowMapFBO::ShadowMapFBO()
 {
-	m_Width = width;
-	m_Height = height;
+	
+}
 
-	glGenFramebuffers(1, &m_Fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_Fbo);
+ShadowMapFBO::~ShadowMapFBO()
+{
+	if (m_fbo)
+		glDeleteFramebuffers(1, &m_fbo);
+	if (m_shadowMap)
+		glDeleteTextures(1, &m_shadowMap);
+}
 
-	glGenTextures(1, &m_TexID);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_TexID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
+{
+	glGenFramebuffers(1, &m_fbo);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TexID, 0);
+	glGenTextures(1, &m_shadowMap);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMap, 0);
+	//glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap, 0);
 
 	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer incomplete" << std::endl;
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		printf("FB error, status: 0x%x\n", Status);
+		return false;
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return true;
 }
 
-ShadowBuffer::~ShadowBuffer()
+void ShadowMapFBO::BindForWriting()
 {
-	if (m_Fbo)
-		glDeleteFramebuffers(1, &m_Fbo);
-	if (m_TexID)
-		glDeleteTextures(1, &m_TexID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 }
 
-void ShadowBuffer::setUniforms(Shader& shadowShader, Shader& regularShader, Light& light)
+void ShadowMapFBO::BindForReading(int i)
 {
-	glm::vec3 lightInvDir = glm::vec3(0.5f, 2.0f, 2.0f);
-
-	Camera camera(glm::vec3(-5, 10, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	//glm::mat4 depthViewMatrix = camera.getInverseViewMatrix();
-	glm::mat4 depthModelMatrix = glm::mat4(1.0);
-	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-		);
-
-	glm::mat4 depthBiasMatrix = biasMatrix * depthMVP;
-
-	shadowShader.bind();
-	shadowShader.setUniformMatrix4("depthMVP", depthMVP);
-
-	regularShader.bind();
-	regularShader.setUniformMatrix4("depthBiasMVP", depthBiasMatrix);
-	regularShader.setUniform1("sampler", 0);
-	regularShader.setUniform1("shadowMap", 1);
-	regularShader.unbind();
-}
-
-void ShadowBuffer::bind()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, m_Fbo);
-	glViewport(0, 0, m_Width, m_Height);
-}
-
-void ShadowBuffer::unbind()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, Window::getWidth(), Window::getHeight());
+	glActiveTexture(GL_TEXTURE0 + i);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
 }

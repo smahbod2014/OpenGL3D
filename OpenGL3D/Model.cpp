@@ -5,10 +5,44 @@
 #include "VBOIndexer.h"
 #include <iostream>
 
-Model::Model(float* vertices, float* texCoords, float* normals, int* indices, int numVertices, int indexCount)
+Model::Model()
+{
+
+}
+
+Model::~Model()
+{
+	if (m_Vao)
+		glDeleteVertexArrays(1, &m_Vao);
+	if (m_Vbo)
+		glDeleteBuffers(1, &m_Vbo);
+	if (m_Ibo)
+		glDeleteBuffers(1, &m_Ibo);
+	if (m_TexID)
+		glDeleteTextures(1, &m_TexID);
+}
+
+void Model::loadTexture(const char* path)
+{
+	glGenTextures(1, &m_TexID);
+	glBindTexture(GL_TEXTURE_2D, m_TexID);
+
+	long fileLength;
+	unsigned long width, height;
+	std::vector<unsigned char> imageData;
+	unsigned char* fileData = FileReader::read(path, fileLength);
+	decodePNG(imageData, width, height, fileData, fileLength);
+	delete[] fileData;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Model::generate(float* vertices, float* texCoords, float* normals, unsigned int* indices, int numVertices, int indexCount)
 {
 	m_NumIndices = indexCount;
-	
+
 	glGenVertexArrays(1, &m_Vao);
 	glBindVertexArray(m_Vao);
 
@@ -44,7 +78,7 @@ Model::Model(float* vertices, float* texCoords, float* normals, int* indices, in
 	delete[] vertexData;
 }
 
-Model::Model(const std::string& filepath)
+void Model::generate(const std::string& filepath)
 {
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
@@ -58,42 +92,7 @@ Model::Model(const std::string& filepath)
 	std::vector<glm::vec3> indexed_normals;
 	indexVBO(vertices, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
 
-
-#if 0
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals);
-	assert(scene);
-
-	const aiMesh* mesh = scene->mMeshes[0];
-
-	std::vector<VertexData> vertices;
-	std::vector<unsigned int> indices;
-
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-	{
-		VertexData vd;
-		vd.vertex = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vd.uv = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		vd.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		vertices.push_back(vd);
-	}
-
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	{
-		const aiFace& face = mesh->mFaces[i];
-		assert(face.mNumIndices == 3);
-		indices.push_back(face.mIndices[0]);
-		indices.push_back(face.mIndices[1]);
-		indices.push_back(face.mIndices[2]);
-	}
-#endif
 	m_NumIndices = indices.size();
-	
-	/*std::cout << indexed_vertices.size() << std::endl;
-	std::cout << indexed_uvs.size() << std::endl;
-	std::cout << indexed_normals.size() << std::endl;
-	std::cout << indices.size() << std::endl;
-	std::cout << sizeof(glm::vec3) << " " << sizeof(glm::vec2) << std::endl;*/
 
 	VertexData* vd = new VertexData[indexed_vertices.size()];
 	for (size_t i = 0; i < indexed_vertices.size(); i++)
@@ -130,31 +129,39 @@ Model::Model(const std::string& filepath)
 	delete[] vd;
 }
 
-Model::~Model()
+void Model::generate(float size)
 {
-	if (m_Vao)
-		glDeleteVertexArrays(1, &m_Vao);
-	if (m_Vbo)
-		glDeleteBuffers(1, &m_Vbo);
-	if (m_Ibo)
-		glDeleteBuffers(1, &m_Ibo);
-	if (m_TexID)
-		glDeleteTextures(1, &m_TexID);
+	float half = size / 2.0f;
+	float vertices[] =
+	{
+		0, 8 + half, half,
+		0, 8 - half, half,
+		0, 8 - half, -half,
+		0, 8 + half, -half
+	};
+
+	float texCoords[] =
+	{
+		0, 0, 0, 1, 1, 1, 1, 0
+	};
+
+	float normals[] =
+	{
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
+	};
+
+	unsigned int indices[] =
+	{
+		0, 1, 2, 2, 3, 0
+	};
+
+	int numVertices = 4, numIndices = 6;
+
+	generate(vertices, texCoords, normals, indices, numVertices, numIndices);
 }
 
-void Model::loadTexture(const char* path)
+void Model::bindTexture(int i)
 {
-	glGenTextures(1, &m_TexID);
+	glActiveTexture(GL_TEXTURE0 + i);
 	glBindTexture(GL_TEXTURE_2D, m_TexID);
-
-	long fileLength;
-	unsigned long width, height;
-	std::vector<unsigned char> imageData;
-	unsigned char* fileData = FileReader::read(path, fileLength);
-	decodePNG(imageData, width, height, fileData, fileLength);
-	delete fileData;
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData.data());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }

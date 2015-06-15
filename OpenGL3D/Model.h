@@ -15,11 +15,14 @@ class Model
 {
 	friend class Renderer;
 public:
-	Model(float* vertices, float* texCoords, float* normals, int* indices, int numVertices, int indexCount);
-	Model(const std::string& filepath);
+	Model();
 	~Model();
 
 	void loadTexture(const char* path);
+	void generate(const std::string& filepath);
+	void generate(float size);
+	void generate(float* vertices, float* texCoords, float* normals, unsigned int* indices, int numVertices, int indexCount);
+	void bindTexture(int i);
 
 private:
 	int m_NumIndices;

@@ -27,6 +27,7 @@ private:
 	static int m_Width, m_Height;
 	
 	SDL_Window* m_Window;
+	std::string m_Name;
 	bool m_ShouldClose = false;
 	Uint32 m_StartFrameTime = 0;
 	int m_Ticks = 0;

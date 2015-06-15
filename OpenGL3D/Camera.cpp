@@ -4,12 +4,14 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
+Camera::Camera()
+{
+	set(glm::vec3(0, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+}
+
 Camera::Camera(const glm::vec3& position, const glm::vec3& lookAt, const glm::vec3& worldUp)
 {
-	m_Position = position;
-	m_LookAt = lookAt;
-	m_WorldUp = worldUp;
-	update();
+	set(position, lookAt, worldUp);
 }
 
 Camera::~Camera()
@@ -69,6 +71,11 @@ void Camera::translate(const glm::vec3& amount)
 	update();
 }
 
+void Camera::setPosition(const glm::vec3& position)
+{
+	translate(position - m_Position);
+}
+
 void Camera::rotate(const glm::vec3& axis, float degrees)
 {
 	glm::mat4 rotation = glm::rotate(glm::radians<float>(degrees), axis);
@@ -81,5 +88,13 @@ void Camera::rotate(const glm::vec3& axis, float degrees)
 	m_LookAt = glm::vec3(lookAtResult);
 	m_WorldUp = glm::vec3(worldUpResult);
 
+	update();
+}
+
+void Camera::set(const glm::vec3& position, const glm::vec3& lookAt, const glm::vec3& worldUp)
+{
+	m_Position = position;
+	m_LookAt = lookAt;
+	m_WorldUp = worldUp;
 	update();
 }

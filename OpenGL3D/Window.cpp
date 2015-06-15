@@ -8,6 +8,7 @@ Window::Window(const std::string& name, int width, int height)
 {
 	m_Width = width;
 	m_Height = height;
+	m_Name = name;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -25,8 +26,8 @@ Window::Window(const std::string& name, int width, int height)
 	glViewport(0, 0, m_Width, m_Height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	SDL_GL_SetSwapInterval(0);
 }
@@ -83,6 +84,12 @@ void Window::end()
 	}
 
 	m_Ticks++;
+
+	if (m_Ticks % (int)m_MaxFps == 0)
+	{
+		std::string fpsName = m_Name + " - FPS: " + std::to_string(getFps());
+		SDL_SetWindowTitle(m_Window, fpsName.c_str());
+	}
 }
 
 void Window::calculateFPS()

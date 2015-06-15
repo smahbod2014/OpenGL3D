@@ -5,20 +5,20 @@
 class Shader;
 class Light;
 
-class ShadowBuffer
+class ShadowMapFBO
 {
 public:
-	ShadowBuffer(int width, int height);
-	~ShadowBuffer();
+	ShadowMapFBO();
 
-	void setUniforms(Shader& shadowShader, Shader& regularShader, Light& light);
-	void bind();
-	void unbind();
+	~ShadowMapFBO();
 
-	GLuint getTexID() const { return m_TexID; }
+	bool Init(unsigned int WindowWidth, unsigned int WindowHeight);
+
+	void BindForWriting();
+
+	void BindForReading(int i);
 
 private:
-	GLuint m_Fbo = 0;
-	GLuint m_TexID = 0;
-	int m_Width, m_Height;
+	GLuint m_fbo;
+	GLuint m_shadowMap;
 };
