@@ -111,50 +111,41 @@ void Shader::setup(const char* vs, const char* fs)
 		glDeleteShader(fragmentShader);
 }
 
-void Shader::setUniform1(const char* uniformName, float value)
+GLint Shader::lookup(const std::string& uniformName)
 {
 	auto it = m_UniformCache.find(uniformName);
 	if (it == m_UniformCache.end())
 	{
 		//insert into cache
-		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName);
+		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName.c_str());
+
+		//std::cout << "Caching (" << m_UniformCache[uniformName] << "): " << uniformName << std::endl;
 	}
 
-	glUniform1f(m_UniformCache[uniformName], value);
+	return m_UniformCache[uniformName];
 }
 
-void Shader::setUniform1(const char* uniformName, int value)
+void Shader::setUniform1(const std::string& uniformName, float value)
 {
-	auto it = m_UniformCache.find(uniformName);
-	if (it == m_UniformCache.end())
-	{
-		//insert into cache
-		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName);
-	}
-
-	glUniform1i(m_UniformCache[uniformName], value);
+	glUniform1f(lookup(uniformName), value);
 }
 
-void Shader::setUniform3(const char* uniformName, const glm::vec3& values)
+void Shader::setUniform1(const std::string& uniformName, int value)
 {
-	auto it = m_UniformCache.find(uniformName);
-	if (it == m_UniformCache.end())
-	{
-		//insert into cache
-		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName);
-	}
-
-	glUniform3f(m_UniformCache[uniformName], values.x, values.y, values.z);
+	glUniform1i(lookup(uniformName), value);
 }
 
-void Shader::setUniformMatrix4(const char* uniformName, const glm::mat4& values)
+void Shader::setUniform1(const std::string& uniformName, unsigned int value)
 {
-	auto it = m_UniformCache.find(uniformName);
-	if (it == m_UniformCache.end())
-	{
-		//insert into cache
-		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName);
-	}
+	glUniform1i(lookup(uniformName), (int)value);
+}
 
-	glUniformMatrix4fv(m_UniformCache[uniformName], 1, GL_FALSE, &values[0][0]);
+void Shader::setUniform3(const std::string& uniformName, const glm::vec3& values)
+{
+	glUniform3f(lookup(uniformName), values.x, values.y, values.z);
+}
+
+void Shader::setUniformMatrix4(const std::string& uniformName, const glm::mat4& values)
+{
+	glUniformMatrix4fv(lookup(uniformName), 1, GL_FALSE, &values[0][0]);
 }

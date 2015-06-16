@@ -2,9 +2,6 @@
 
 #include <glm/glm.hpp>
 
-#define CAMERA_SPEED 10.0f
-#define CAMERA_ROTATION 120.0f
-
 class Camera
 {
 public:
