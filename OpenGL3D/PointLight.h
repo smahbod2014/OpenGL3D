@@ -10,7 +10,7 @@ public:
 	PointLight(const glm::vec3& position, unsigned int color, float ca, float la, float qa);
 	virtual ~PointLight();
 
-	virtual void setUniforms(Shader& shader, const std::string& prefix);
+	virtual void setUniforms(Shader& shader, const std::string& prefix) override;
 
 	void setAttenuation(float constant, float linear, float quadratic);
 	void translate(const glm::vec3& amount);

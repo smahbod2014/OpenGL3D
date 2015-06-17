@@ -1,6 +1,7 @@
 #include "Shader.h"
 #include <iostream>
 
+GLuint Shader::currentlyBoundID = 0;
 
 Shader::Shader()
 {
@@ -30,12 +31,20 @@ void Shader::load(const char* vert, const char* frag)
 
 void Shader::bind()
 {
-	glUseProgram(m_ProgramID);
+	if (m_ProgramID != currentlyBoundID)
+	{
+		glUseProgram(m_ProgramID);
+		currentlyBoundID = m_ProgramID;
+	}
 }
 
 void Shader::unbind()
 {
-	glUseProgram(0);
+	if (currentlyBoundID != 0)
+	{
+		glUseProgram(0);
+		currentlyBoundID = 0;
+	}
 }
 
 char* Shader::read(const char *filename)

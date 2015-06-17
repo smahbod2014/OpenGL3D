@@ -1,7 +1,6 @@
 #include "ShadowBuffer.h"
 #include "Window.h"
 #include "Shader.h"
-#include "Light.h"
 #include "Camera.h"
 #include "Constants.h"
 #include <iostream>

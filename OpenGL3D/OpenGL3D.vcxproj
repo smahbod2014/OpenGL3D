@@ -85,10 +85,13 @@
     <ClCompile Include="BaseLight.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="Geode.cpp" />
+    <ClCompile Include="GLMHelper.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelCache.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="PicoPNG.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -96,6 +99,8 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowBuffer.cpp" />
     <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VBOIndexer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -104,9 +109,12 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="FileReader.h" />
-    <ClInclude Include="Light.h" />
+    <ClInclude Include="Geode.h" />
+    <ClInclude Include="GLMHelper.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelCache.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="OBJLoader.h" />
     <ClInclude Include="PicoPNG.h" />
     <ClInclude Include="PointLight.h" />
@@ -114,6 +122,8 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowBuffer.h" />
     <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="VBOIndexer.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

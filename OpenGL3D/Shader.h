@@ -21,6 +21,8 @@ public:
 	void setUniform3(const std::string& uniformName, const glm::vec3& values);
 	void setUniformMatrix4(const std::string& uniformName, const glm::mat4& matrix);
 private:
+	static GLuint currentlyBoundID;
+
 	char* read(const char* filename);
 	void setup(const char* vs, const char* fs);
 	GLint lookup(const std::string& uniformName);

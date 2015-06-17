@@ -24,11 +24,11 @@ public:
 	void generate(float* vertices, float* texCoords, float* normals, unsigned int* indices, int numVertices, int indexCount);
 	void bindTexture(int i);
 
+	void setTextureID(GLuint texID) { m_TexID = texID; }
 private:
 	int m_NumIndices;
 	GLuint m_Vao;
 	GLuint m_Vbo;
 	GLuint m_Ibo;
-public:
 	GLuint m_TexID;
 };

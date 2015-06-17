@@ -11,7 +11,7 @@ layout (location = 2) in vec3 normal;
 
 uniform mat4 M = mat4(1.0);
 uniform mat4 VP;
-uniform mat4 lightMVP[NUM_SPOTLIGHTS];
+uniform mat4 lightVP[NUM_SPOTLIGHTS];
 
 
 out vec2 passTexCoord;
@@ -31,5 +31,5 @@ void main()
 	
 	//---
 	for (int i = 0; i < NUM_SPOTLIGHTS; i++)
-		lightSpacePosition[i] = lightMVP[i] * vec4(position, 1.0);
+		lightSpacePosition[i] = lightVP[i] * worldPosition;
 }
