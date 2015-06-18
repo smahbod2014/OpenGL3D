@@ -3,6 +3,7 @@
 
 int Window::m_Width = 0;
 int Window::m_Height = 0;
+glm::vec4 Window::m_ClearColor;
 
 Window::Window(const std::string& name, int width, int height)
 {
@@ -22,7 +23,8 @@ Window::Window(const std::string& name, int width, int height)
 	
 	std::cout << "Open GL version: " << glGetString(GL_VERSION) << std::endl;
 
-	glClearColor(0, 0, 1, 1);
+	m_ClearColor = glm::vec4(0, 0, 1, 1);
+	glClearColor(m_ClearColor.x, m_ClearColor.y, m_ClearColor.z, m_ClearColor.w);
 	glViewport(0, 0, m_Width, m_Height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -69,6 +71,7 @@ void Window::end()
 {
 	Input::update();
 
+#if 1
 	Uint32 difference = SDL_GetTicks() - m_StartFrameTime;
 	float maxFrameTime = 1000.0f / m_MaxFps;
 	if ((Uint32)maxFrameTime > difference)
@@ -82,6 +85,14 @@ void Window::end()
 		m_Delta = difference / 1000.0f;
 		m_InstantaneousFps = 1.0f / m_Delta;
 	}
+#else
+	Uint32 difference = SDL_GetTicks() - m_StartFrameTime;
+	if (difference > 0)
+	{
+		m_InstantaneousFps = 1000.0f / difference;
+		m_Delta = 1.0f / m_InstantaneousFps;
+	}
+#endif
 
 	m_Ticks++;
 
@@ -89,6 +100,7 @@ void Window::end()
 	{
 		std::string fpsName = m_Name + " - FPS: " + std::to_string(getFps());
 		SDL_SetWindowTitle(m_Window, fpsName.c_str());
+		//std::cout << SDL_GetTicks() << std::endl;
 	}
 }
 

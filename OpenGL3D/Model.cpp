@@ -134,10 +134,10 @@ void Model::generate(float size)
 	float half = size / 2.0f;
 	float vertices[] =
 	{
-		0, 8 + half, half,
-		0, 8 - half, half,
-		0, 8 - half, -half,
-		0, 8 + half, -half
+		-half, 0, -half,
+		-half, 0, half,
+		half, 0, half,
+		half, 0, -half
 	};
 
 	float texCoords[] =

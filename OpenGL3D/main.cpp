@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "ShadowBuffer.h"
+#include "ShadowMapCube.h"
 #include "BaseLight.h"
 #include "SpotLight.h"
 #include "Constants.h"
@@ -13,6 +14,7 @@
 #include "TextureManager.h"
 #include "Transform.h"
 #include "Geode.h"
+#include "Switch.h"
 #include "GLMHelper.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -22,19 +24,23 @@
 Model room;
 Model quad;
 ShadowMapFBO shadowMapFBO;
+std::vector<ShadowMapCube*> pointLightFbos;
 Camera camera;
 Shader shadowShader;
+Shader pointLightShadowShader;
 Shader lightShader;
 Renderer renderer;
 std::vector<BaseLight*> lights;
+std::vector<PointLight*> pointLights;
 
-glm::mat4 objectTransformation;
 glm::mat4 P;
 
 Transform root;
+Switch wallSwitch;
 
 void RenderPass();
 void ShadowMapPass(int i);
+void PointLightShadowMapPass(int i);
 
 
 int main(int argc, char* argv[])
@@ -43,29 +49,49 @@ int main(int argc, char* argv[])
 	int width = 1440, height = 810;
 	Window window("Open GL Testing", width, height);
 	window.setMaxFPS(MAX_FPS);
+	ShadowMapCube::initProjections(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS);
 
-	ModelCache::loadModel("room", "Models/room_thickwalls.obj");
+	ModelCache::loadModel("plane", 30.0f);
+	//ModelCache::loadModel("room", "Models/room_thickwalls.obj");
 	ModelCache::loadModel("sphere", "Models/sphere2.obj");
-	TextureManager::loadTexture("face", "Textures/wtf face.png");
+	//TextureManager::loadTexture("face", "Textures/wtf face.png");
 	TextureManager::loadTexture("tiled", "Textures/tiled2.png");
 	TextureManager::loadTexture("kalas", "Textures/whocares.png");
+	TextureManager::loadTexture("checker", "Textures/checkerboard.png");
+	TextureManager::loadTexture("left", "Textures/test_left.png");
+	TextureManager::loadTexture("bottom", "Textures/test_bottom.png");
+	TextureManager::loadTexture("back", "Textures/test_back.png");
+	TextureManager::loadTexture("right", "Textures/test_right.png");
 
-	camera.set(glm::vec3(10, 10, 0), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	camera.set(glm::vec3(0, 20, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	//room.generate("Models/room_thickwalls.obj");
 	
-	const glm::vec3 spotPosition1(0, 15, -15);
-	const glm::vec3 spotPosition2(10, 15, 0);
-	SpotLight* spot1 = new SpotLight(spotPosition1, 0xdeff4cff, -spotPosition1, 10.0f, 1.0f, 0.0f, 0.0001f);
-	SpotLight* spot2 = new SpotLight(spotPosition2, 0xb0ff75ff, -spotPosition2, 15.0f, 1.0f, 0.0f, 0.0001f);
-	//lights.push_back(spot1);
+	const glm::vec3 spotPosition1(15, 10, 2);
+	const glm::vec3 spotPosition2(0, 15, 15);
+	//SpotLight* spot1 = new SpotLight(spotPosition1, 0xdeff4cff, -spotPosition1, 15.0f, 1.0f, 0.0f, 0.0001f);
+	SpotLight* spot2 = new SpotLight(glm::vec3(-3, 5, 3), 0xff3d57ff, glm::vec3(1, 0, -1), 30.0f, 1.0f, 0.0f, 0.0001f);
+	//SpotLight* spot3 = new SpotLight(glm::vec3(10, 5, 0), 0xffffffff, glm::vec3(-1, 0, 0), 20.0f, 1.0f, 0.0f, 0.0001f);
+	PointLight* point1 = new PointLight(glm::vec3(0, 8, 0), 0x66d8ffff, 1.0f, 0.0f, 0.0001f);
 	lights.push_back(spot2);
-	assert(shadowMapFBO.Init(width, height, lights.size()));
+	pointLights.push_back(point1);
+
+	if (lights.size() > 0)
+		assert(shadowMapFBO.Init(width, height, lights.size()));
+
+	for (auto& it : pointLights)
+	{
+		ShadowMapCube* pointLightFbo = new ShadowMapCube();
+		assert(pointLightFbo->Init(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS));
+		pointLightFbos.push_back(pointLightFbo);
+		std::cout << "Made an fbo" << std::endl;
+	}
 
 	shadowShader.load("Shaders/ShadowMap.vert", nullptr);
 	lightShader.load("Shaders/Shine.vert", "Shaders/Shine.frag");
+	pointLightShadowShader.load("Shaders/PointLightShadowMap.vert", "Shaders/PointLightShadowMap.frag");
 	renderer.setShader(&lightShader);
-	renderer.setShadowShader(&shadowShader);
+	//renderer.setShadowShader(&pointLightShadowShader);
 
 	P = glm::perspective<float>(glm::radians<float>(60.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
@@ -76,24 +102,52 @@ int main(int argc, char* argv[])
 		lights[i]->setUniforms(lightShader, "spotLights[" + std::to_string(i) + "]");
 		lightShader.setUniform1("gShadowMap[" + std::to_string(i) + "]", SHADOW_BASE_INDEX + i);
 	}
+	for (size_t i = 0; i < pointLights.size(); i++)
+	{
+		pointLights[i]->setUniforms(lightShader, "pointLights[" + std::to_string(i) + "]");
+		lightShader.setUniform1("gShadowCubeMap[" + std::to_string(i) + "]", SHADOW_CUBE_BASE_INDEX + i);
+	}
 	lightShader.unbind();
 
-
 	Transform* rotation = new Transform();
-	Transform* upTranslation = new Transform(translation(3, 5, 0));
-	Transform* upTranslation2 = new Transform(translation(-2, 8, -2));
-	Geode* roomGeode = new Geode("room", &renderer);
+	Transform* upTranslation = new Transform(translation(0, 5, 0));
+	Transform* upTranslation2 = new Transform(translation(-7.5f, 8, 0));
+	Transform* wallRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(0, 0, 1)));
+	Transform* wallTranslation = new Transform(translation(glm::vec3(-15.0f, 15.0f, 0)));
+	Transform* backWallRotation = new Transform(glm::rotate(glm::radians<float>(90.0f), glm::vec3(1, 0, 0)));
+	Transform* backWallTranslation = new Transform(translation(glm::vec3(0, 15.0f, -15.0f)));
+	Transform* rightWallRotation = new Transform(glm::rotate(glm::radians<float>(90.0f), glm::vec3(0, 0, 1)));
+	Transform* rightWallTranslation = new Transform(translation(glm::vec3(15.0f, 15.0f, 0)));
+	//Geode* roomGeode = new Geode("room", &renderer);
+	Geode* floorGeode = new Geode("plane", &renderer);
+	Geode* wallGeode = new Geode("plane", &renderer);
+	Geode* rightWallGeode = new Geode("plane", &renderer);
+	Geode* backWallGeode = new Geode("plane", &renderer);
 	Geode* ballGeode = new Geode("sphere", &renderer);
 	Geode* ballGeode2 = new Geode("sphere", &renderer);
-	roomGeode->setTextureID(TextureManager::getTexture("face"));
+	//roomGeode->setTextureID(TextureManager::getTexture("face"));
+	floorGeode->setTextureID(TextureManager::getTexture("bottom"));
+	wallGeode->setTextureID(TextureManager::getTexture("left"));
+	rightWallGeode->setTextureID(TextureManager::getTexture("right"));
+	backWallGeode->setTextureID(TextureManager::getTexture("back"));
 	ballGeode->setTextureID(TextureManager::getTexture("tiled"));
 	ballGeode2->setTextureID(TextureManager::getTexture("kalas"));
 	root.addChild(rotation);
-	rotation->addChild(roomGeode);
+	rotation->addChild(&wallSwitch);
+	wallSwitch.addChild(floorGeode);
 	rotation->addChild(upTranslation);
 	rotation->addChild(upTranslation2);
 	upTranslation->addChild(ballGeode);
 	upTranslation2->addChild(ballGeode2);
+	wallSwitch.addChild(wallTranslation);
+	wallTranslation->addChild(wallRotation);
+	wallRotation->addChild(wallGeode);
+	wallSwitch.addChild(rightWallTranslation);
+	rightWallTranslation->addChild(rightWallRotation);
+	rightWallRotation->addChild(rightWallGeode);
+	wallSwitch.addChild(backWallTranslation);
+	backWallTranslation->addChild(backWallRotation);
+	backWallRotation->addChild(backWallGeode);
 
 	glm::vec3 velocity;
 	glm::vec3 velocity2;
@@ -101,8 +155,8 @@ int main(int argc, char* argv[])
 
 
 	float speed = 25.0f;
-	float rotateSpeed = 30.0f;
-	bool cameraOnLight = true;
+	float rotateSpeed = -7.5f;
+	bool cameraOnLight = false;
 	while (!window.shouldClose())
 	{
 		window.begin();
@@ -110,8 +164,11 @@ int main(int argc, char* argv[])
 		float dt = window.getDelta();
 
 		camera.input(dt);
-		//objectTransformation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
+		
 		*rotation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
+		if (glGetError())
+			std::cout << "7: " << glGetError() << std::endl;
+#if 0
 		velocity += gravity * dt;
 		velocity2 += gravity * dt;
 		upTranslation->translate(velocity * dt);
@@ -130,41 +187,68 @@ int main(int argc, char* argv[])
 			glm::vec3 currentPos = upTranslation2->getTranslation();
 			upTranslation2->setPosition(glm::vec3(currentPos.x, 1.0f, currentPos.z));
 		}
+#endif
 
 #if 0
-		glm::vec3 toOrigin = glm::normalize(glm::vec3(0, 0, 0) - spotLight.getPosition());
+		SpotLight* sl = (SpotLight*)lights[0];
+		//glm::vec3 toOrigin = glm::normalize(glm::vec3(0, 0, 0) - sl->getPosition());
 		if (Input::isKeyDown(SDLK_i))
-			spotLight.translate(glm::vec3(0, 1, 0) * speed * dt);
+			sl->translate(glm::vec3(0, 1, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_k))
-			spotLight.translate(glm::vec3(0, -1, 0) * speed * dt);
+			sl->translate(glm::vec3(0, -1, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_j))
-			spotLight.translate(glm::vec3(1, 0, 0) * speed * dt);
+			sl->translate(glm::vec3(-1, 0, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_l))
-			spotLight.translate(glm::vec3(-1, 0, 0) * speed * dt);
-		if (Input::isKeyDown(SDLK_y))
-			spotLight.translate(toOrigin * speed * dt);
-		if (Input::isKeyDown(SDLK_h))
-			spotLight.translate(-toOrigin * speed * dt);
-		if (Input::isKeyJustPressed(SDLK_p))
+			sl->translate(glm::vec3(1, 0, 0) * speed * dt);
+		if (Input::isKeyDown(SDLK_p))
+			sl->translate(glm::vec3(0, 0, -1) * speed * dt);
+		if (Input::isKeyDown(SDLK_SEMICOLON))
+			sl->translate(glm::vec3(0, 0, 1) * speed * dt);
+		if (Input::isKeyDown(SDLK_COMMA))
+			sl->rotate(glm::vec3(0, 1, 0), CAMERA_ROTATION * dt);
+		if (Input::isKeyDown(SDLK_PERIOD))
+			sl->rotate(glm::vec3(0, 1, 0), -CAMERA_ROTATION * dt);
+		
+		if (Input::isKeyJustPressed(SDLK_u))
 			cameraOnLight = !cameraOnLight;
 
 		//point the spotlight towards the origin
-		spotLight.setDirection(-spotLight.getPosition());
+		//sl->setDirection(-spotLight.getPosition());
 
 		if (cameraOnLight)
-			camera.set(spotLight.getPosition(), spotLight.getDirection(), glm::vec3(0, 1, 0));
+			camera.set(sl->getPosition(), sl->getPosition() + sl->getDirection(), glm::vec3(0, 1, 0));
 #endif
-
+		
 		if (Input::isKeyJustPressed(SDLK_1))
-			camera.set(((SpotLight*)lights[0])->getPosition(), ((SpotLight*)lights[0])->getDirection(), glm::vec3(0, 1, 0));
+			camera.set(pointLightFbos[0]->m_Faces[0].camera.getPosition(), pointLightFbos[0]->m_Faces[0].camera.getLookAt(), pointLightFbos[0]->m_Faces[0].camera.getUp());
 		if (Input::isKeyJustPressed(SDLK_2))
-			camera.set(((SpotLight*)lights[1])->getPosition(), ((SpotLight*)lights[1])->getDirection(), glm::vec3(0, 1, 0));
+			camera.set(pointLightFbos[0]->m_Faces[1].camera.getPosition(), pointLightFbos[0]->m_Faces[1].camera.getLookAt(), pointLightFbos[0]->m_Faces[1].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_3))
+			camera.set(pointLightFbos[0]->m_Faces[2].camera.getPosition(), pointLightFbos[0]->m_Faces[2].camera.getLookAt(), pointLightFbos[0]->m_Faces[2].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_4))
+			camera.set(pointLightFbos[0]->m_Faces[3].camera.getPosition(), pointLightFbos[0]->m_Faces[3].camera.getLookAt(), pointLightFbos[0]->m_Faces[3].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_5))
+			camera.set(pointLightFbos[0]->m_Faces[4].camera.getPosition(), pointLightFbos[0]->m_Faces[4].camera.getLookAt(), pointLightFbos[0]->m_Faces[4].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_6))
+			camera.set(pointLightFbos[0]->m_Faces[5].camera.getPosition(), pointLightFbos[0]->m_Faces[5].camera.getLookAt(), pointLightFbos[0]->m_Faces[5].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_t))
+		{
+			pointLights[0]->setActive(!pointLights[0]->isActive());
+		}
+		if (Input::isKeyJustPressed(SDLK_p))
+			wallSwitch.setEnabled(!wallSwitch.isEnabled());
 
 		
 		glCullFace(GL_FRONT);
+		renderer.setShadowShader(&shadowShader);
 		for (size_t i = 0; i < lights.size(); i++)
 		{
 			ShadowMapPass(i);
+		}
+		renderer.setShadowShader(&pointLightShadowShader);
+		for (size_t i = 0; i < pointLights.size(); i++)
+		{
+			PointLightShadowMapPass(i);
 		}
 		glCullFace(GL_BACK);
 		RenderPass();
@@ -192,22 +276,50 @@ void ShadowMapPass(int i)
 	root.draw(glm::mat4(1.0));
 	shadowShader.unbind();
 
-
 	//careful! this is still needed. or, move it to the render pass when updating the light uniforms?
 	lightShader.bind();
-	lightShader.setUniformMatrix4("lightVP[" + std::to_string(i) + "]", lightVP);
+	lightShader.setUniformMatrix4("spotLightVP[" + std::to_string(i) + "]", lightVP);
 	lightShader.unbind();
+}
+
+void PointLightShadowMapPass(int i)
+{
+	glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+	glViewport(0, 0, CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS);
+	root.setRenderPassIndex(i);
+	//wallSwitch.setEnabled(false);
+	
+	pointLightShadowShader.bind();
+	pointLightShadowShader.setUniform3("lightWorldPos", pointLights[i]->getPosition());
+	pointLightFbos[i]->setLightPosition(pointLights[i]->getPosition());
+	for (int j = 0; j < 6; j++)
+	{
+		pointLightFbos[i]->BindForWriting(pointLightFbos[i]->m_Faces[j].cubemapFace);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glm::mat4 lightVP = ShadowMapCube::s_Projection * pointLightFbos[i]->m_Faces[j].camera.getInverseViewMatrix();
+		pointLightShadowShader.setUniformMatrix4("lightVP", lightVP);
+		root.draw(glm::mat4(1.0));
+	}
+	pointLightShadowShader.unbind();
 }
 
 void RenderPass()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, Window::getWidth(), Window::getHeight());
 	root.setRenderPassIndex(-1);
-
+	//wallSwitch.setEnabled(true);
+	
+	const glm::vec4& cc = Window::getClearColor();
+	glClearColor(cc.x, cc.y, cc.z, cc.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (size_t i = 0; i < lights.size(); i++)
 		shadowMapFBO.BindForReading(SHADOW_BASE_INDEX + i);
+
+	for (size_t i = 0; i < pointLights.size(); i++)
+		pointLightFbos[i]->BindForReading(SHADOW_CUBE_BASE_INDEX + i);
 
 	lightShader.bind();
 	const glm::mat4& VP = P * camera.getInverseViewMatrix();
@@ -215,9 +327,9 @@ void RenderPass()
 
 	//the lights can change. update them
 	for (size_t i = 0; i < lights.size(); i++)
-	{
 		lights[i]->setUniforms(lightShader, "spotLights[" + std::to_string(i) + "]");
-	}
+	for (size_t i = 0; i < pointLights.size(); i++)
+		pointLights[i]->setUniforms(lightShader, "pointLights[" + std::to_string(i) + "]");
 
 	root.draw(glm::mat4(1.0));
 	lightShader.unbind();

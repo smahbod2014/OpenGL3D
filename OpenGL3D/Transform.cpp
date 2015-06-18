@@ -19,8 +19,7 @@ Transform::~Transform()
 void Transform::draw(const glm::mat4& matrix)
 {
 	glm::mat4 combined = matrix * m_Transform;
-	for (size_t i = 0; i < m_Children.size(); i++)
-		m_Children[i]->draw(combined);
+	Group::draw(combined);
 }
 
 void Transform::translate(const glm::vec3& amount)

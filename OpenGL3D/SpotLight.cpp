@@ -42,3 +42,21 @@ void SpotLight::setUniforms(Shader& shader, const std::string& prefix)
 	shader.setUniform3(prefix + ".direction", m_Direction);
 	shader.setUniform1(prefix + ".cutoff", m_AdjustedCutoff);
 }
+
+void SpotLight::translate(const glm::vec3& amount)
+{
+	PointLight::translate(amount);
+	m_ShadowCamera.translate(amount);
+}
+
+void SpotLight::setPosition(const glm::vec3& position)
+{
+	PointLight::translate(position);
+	m_ShadowCamera.setPosition(position);
+}
+
+void SpotLight::rotate(const glm::vec3& axis, float degrees)
+{
+	m_Direction = glm::normalize(glm::vec3(glm::rotate(glm::radians<float>(degrees), axis) * glm::vec4(m_Direction, 0.0)));
+	m_ShadowCamera.rotate(axis, degrees);
+}

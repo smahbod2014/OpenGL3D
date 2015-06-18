@@ -9,7 +9,6 @@ class ShadowMapFBO
 {
 public:
 	ShadowMapFBO();
-
 	~ShadowMapFBO();
 
 	bool Init(unsigned int WindowWidth, unsigned int WindowHeight, int numBuffers);

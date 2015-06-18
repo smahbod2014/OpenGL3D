@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PointLight.h"
-#include "Camera.h"
 #include <glm/glm.hpp>
 
 class Shader;
@@ -22,10 +21,13 @@ public:
 
 	void setDirection(const glm::vec3& direction);
 	void setCutoff(float degrees);
+	virtual void translate(const glm::vec3& amount);
+	virtual void setPosition(const glm::vec3& position);
+	void rotate(const glm::vec3& axis, float degrees);
 
+	const glm::vec3& getDirection() const { return m_Direction; }
 	const glm::mat4& getProjection() const { return m_Projection; }
 	const glm::mat4& getViewMatrix() const { return m_ShadowCamera.getInverseViewMatrix(); }
-	const glm::vec3& getDirection() const { return m_Direction; }
 	float getCutoff() const { return m_Cutoff; }
 protected:
 	glm::vec3 m_Direction;

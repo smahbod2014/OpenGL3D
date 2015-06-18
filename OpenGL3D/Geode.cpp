@@ -3,6 +3,7 @@
 #include "ModelCache.h"
 #include "Renderer.h"
 #include "Shader.h"
+#include "Constants.h"
 
 Geode::Geode(const std::string& alias, Renderer* renderer)
 {
@@ -31,7 +32,7 @@ void Geode::draw(const glm::mat4& matrix)
 		m_Renderer->m_Shader->setUniformMatrix4("M", matrix);
 
 		//the binding of the texture here and NOT in the renderer is crucial!
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_INDEX);
 		glBindTexture(GL_TEXTURE_2D, m_TexID);
 	}
 

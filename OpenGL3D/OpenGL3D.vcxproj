@@ -87,6 +87,7 @@
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Geode.cpp" />
     <ClCompile Include="GLMHelper.cpp" />
+    <ClCompile Include="Group.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -98,7 +99,9 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowBuffer.cpp" />
+    <ClCompile Include="ShadowMapCube.cpp" />
     <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="Switch.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VBOIndexer.cpp" />
@@ -111,6 +114,7 @@
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Geode.h" />
     <ClInclude Include="GLMHelper.h" />
+    <ClInclude Include="Group.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
@@ -121,7 +125,9 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowBuffer.h" />
+    <ClInclude Include="ShadowMapCube.h" />
     <ClInclude Include="SpotLight.h" />
+    <ClInclude Include="Switch.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VBOIndexer.h" />

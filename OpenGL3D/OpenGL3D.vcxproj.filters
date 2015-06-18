@@ -93,6 +93,15 @@
     <ClCompile Include="GLMHelper.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowMapCube.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Group.cpp">
+      <Filter>Source Files\SceneGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="Switch.cpp">
+      <Filter>Source Files\SceneGraph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -157,6 +166,15 @@
     </ClInclude>
     <ClInclude Include="GLMHelper.h">
       <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMapCube.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Switch.h">
+      <Filter>Source Files\SceneGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="Group.h">
+      <Filter>Source Files\SceneGraph</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

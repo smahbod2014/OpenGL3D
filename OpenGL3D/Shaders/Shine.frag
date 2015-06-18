@@ -37,39 +37,50 @@ struct SpotLight
 
 //-----------
 
-const int NUM_SPOTLIGHTS = 5;
+const int POINT_LIGHT = 0;
+const int SPOT_LIGHT = 1;
+
+const int NUM_SPOT_LIGHTS = 5;
+const int NUM_POINT_LIGHTS = 1;
+const vec4 dummy = vec4(0.0, 0.0, 0.0, 0.0);
 
 in vec3 outWorldPosition;
-in vec2 passTexCoord;
+in vec2 outTexCoord;
 in vec3 outNormal;
-in vec4 lightSpacePosition[NUM_SPOTLIGHTS];
+in vec4 spotLightSpacePos[NUM_SPOT_LIGHTS];
 
 out vec4 finalColor;
 
-
 uniform sampler2D sampler;
-uniform sampler2D gShadowMap[NUM_SPOTLIGHTS];
-uniform SpotLight spotLights[NUM_SPOTLIGHTS];
+uniform sampler2D gShadowMap[NUM_SPOT_LIGHTS];
+uniform samplerCube gShadowCubeMap[NUM_POINT_LIGHTS];
+uniform SpotLight spotLights[NUM_SPOT_LIGHTS];
+uniform PointLight pointLights[NUM_POINT_LIGHTS];
 
 
 float calcShadowFactor(vec4 lightSpacePos, int i);
-vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i);
+float calcShadowFactorCube(vec3 lightDirection, int i);
+vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i, int baseLightType);
 vec4 calcSpotLight(SpotLight sl, vec4 lightSpacePos, int i);
 
 void main()
 {
-	vec4 textureColor = texture(sampler, passTexCoord);
+	vec4 textureColor = texture(sampler, outTexCoord);
 	vec4 ambient = vec4(0.2, 0.2, 0.2, 1.0);
 	vec4 totalLighting = vec4(0.0, 0.0, 0.0, 0.0);
 	
-	for (int i = 0; i < NUM_SPOTLIGHTS; i++)
+	for (int i = 0; i < NUM_SPOT_LIGHTS; i++)
 		if (spotLights[i].base.base.isActive == 1)
-			totalLighting += calcSpotLight(spotLights[i], lightSpacePosition[i], i);
+			totalLighting += calcSpotLight(spotLights[i], spotLightSpacePos[i], i);
+	
+	for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+		if (pointLights[i].base.isActive == 1)
+			totalLighting += calcPointLight(pointLights[i], dummy, i, POINT_LIGHT);
 	
 	finalColor = textureColor * clamp(totalLighting + ambient, 0.0, 1.0);
 }
 
-vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i)
+vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i, int baseLightType)
 {
 	vec3 toLightVector = pl.position - outWorldPosition;
 	float d = length(toLightVector);
@@ -77,7 +88,13 @@ vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i)
 		+ pl.attenuation.linearAtten * d
 		+ pl.attenuation.quadraticAtten * d * d);
 	float coeff = max(0.0, dot(outNormal, normalize(toLightVector)));
-	float shadowFactor = calcShadowFactor(lightSpacePos, i);
+	
+	float shadowFactor = 1.0;
+	if (baseLightType == SPOT_LIGHT)
+		shadowFactor = calcShadowFactor(lightSpacePos, i);
+	else if (baseLightType == POINT_LIGHT)
+		shadowFactor = calcShadowFactorCube(-toLightVector, i);
+		
 	return vec4(pl.base.color * attenuation * coeff * shadowFactor, 1.0);
 }
 
@@ -88,7 +105,7 @@ vec4 calcSpotLight(SpotLight sl, vec4 lightSpacePos, int i)
 	
 	if (spotFactor > sl.cutoff)
 	{
-		vec4 pointLightComponent = calcPointLight(sl.base, lightSpacePos, i);
+		vec4 pointLightComponent = calcPointLight(sl.base, lightSpacePos, i, SPOT_LIGHT);
 		float fading = (1.0 - (1.0 - spotFactor) * 1.0 / (1.0 - sl.cutoff));
 		return pointLightComponent * fading;
 	}
@@ -106,8 +123,18 @@ float calcShadowFactor(vec4 lightSpacePos, int i)
 	uvCoords.y = 0.5 * projectedCoords.y + 0.5;
 	float z = 0.5 * projectedCoords.z + 0.5;
 	float depth = texture(gShadowMap[i], uvCoords).x;
-	if (depth < z - 0.00000)
+	if (depth < z)
 		return 0.5;
 	else
 		return 1.0;
+}
+
+float calcShadowFactorCube(vec3 toFragVector, int i)
+{
+	float sampledDistance = texture(gShadowCubeMap[i], toFragVector).r;
+	float dist = length(toFragVector);
+	if (dist < sampledDistance + 0.00000)
+		return 1.0;
+	else
+		return 0.5;
 }

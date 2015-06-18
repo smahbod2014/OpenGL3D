@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Constants.h"
+#include "GLMHelper.h"
 #include <SDL/SDL_keycode.h>
 #include <glm/gtx/transform.hpp>
 #include <iostream>
@@ -41,8 +42,6 @@ void Camera::input(float dt)
 	float moveAmount = CAMERA_SPEED * dt;
 	float rotateAmount = CAMERA_ROTATION * dt;
 
-	
-
 	if (Input::isKeyDown(SDLK_w))
 		translate(m_Forward * moveAmount);
 	if (Input::isKeyDown(SDLK_s))
@@ -75,6 +74,12 @@ void Camera::translate(const glm::vec3& amount)
 void Camera::setPosition(const glm::vec3& position)
 {
 	translate(position - m_Position);
+}
+
+void Camera::setPositionNoLook(const glm::vec3& position)
+{
+	m_Position = position;
+	update();
 }
 
 void Camera::rotate(const glm::vec3& axis, float degrees)

@@ -19,6 +19,20 @@ void ModelCache::loadModel(const std::string& alias, const std::string& path)
 	m_Cache[alias] = model;
 }
 
+void ModelCache::loadModel(const std::string& alias, float size)
+{
+	if (m_Cache.find(alias) != m_Cache.end())
+	{
+		std::cout << "Cache already contains " << alias << std::endl;
+		return;
+	}
+
+	//delete this at some point
+	Model* model = new Model();
+	model->generate(size);
+	m_Cache[alias] = model;
+}
+
 Model* ModelCache::getModel(const std::string& alias)
 {
 	if (m_Cache.find(alias) == m_Cache.end())

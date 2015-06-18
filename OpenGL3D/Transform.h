@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Node.h"
+#include "Group.h"
 #include <vector>
 
-class Transform : public Node
+class Transform : public Group
 {
 public:
 	Transform();
@@ -11,7 +11,6 @@ public:
 	virtual ~Transform();
 
 	virtual void draw(const glm::mat4& matrix) override;
-	void addChild(Node* child) { m_Children.push_back(child); }
 
 	void translate(const glm::vec3& amount);
 	void setPosition(const glm::vec3& position);
@@ -22,5 +21,4 @@ public:
 	glm::vec3 getTranslation() const;
 private:
 	glm::mat4 m_Transform;
-	std::vector<Node*> m_Children;
 };

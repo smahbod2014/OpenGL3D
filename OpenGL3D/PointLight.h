@@ -2,6 +2,7 @@
 
 #include "BaseLight.h"
 #include <glm/glm.hpp>
+#include "Camera.h"
 
 class PointLight : public BaseLight
 {
@@ -13,10 +14,11 @@ public:
 	virtual void setUniforms(Shader& shader, const std::string& prefix) override;
 
 	void setAttenuation(float constant, float linear, float quadratic);
-	void translate(const glm::vec3& amount);
-	void setPosition(const glm::vec3& position);
+	virtual void translate(const glm::vec3& amount);
+	virtual void setPosition(const glm::vec3& position);
 
 	const glm::vec3& getPosition() const { return m_Position; }
+	
 	float getConstant() const { return m_Constant; }
 	float getLinear() const { return m_Linear; }
 	float getQuadratic() const { return m_Quadratic; }
