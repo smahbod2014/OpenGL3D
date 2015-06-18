@@ -62,6 +62,8 @@ int main(int argc, char* argv[])
 	TextureManager::loadTexture("bottom", "Textures/test_bottom.png");
 	TextureManager::loadTexture("back", "Textures/test_back.png");
 	TextureManager::loadTexture("right", "Textures/test_right.png");
+	TextureManager::loadTexture("top", "Textures/test_top.png");
+	TextureManager::loadTexture("front", "Textures/test_front.png");
 
 	camera.set(glm::vec3(0, 20, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
@@ -73,7 +75,7 @@ int main(int argc, char* argv[])
 	SpotLight* spot2 = new SpotLight(glm::vec3(-3, 5, 3), 0xff3d57ff, glm::vec3(1, 0, -1), 30.0f, 1.0f, 0.0f, 0.0001f);
 	//SpotLight* spot3 = new SpotLight(glm::vec3(10, 5, 0), 0xffffffff, glm::vec3(-1, 0, 0), 20.0f, 1.0f, 0.0f, 0.0001f);
 	PointLight* point1 = new PointLight(glm::vec3(0, 8, 0), 0x66d8ffff, 1.0f, 0.0f, 0.0001f);
-	lights.push_back(spot2);
+	//lights.push_back(spot2);
 	pointLights.push_back(point1);
 
 	if (lights.size() > 0)
@@ -118,11 +120,17 @@ int main(int argc, char* argv[])
 	Transform* backWallTranslation = new Transform(translation(glm::vec3(0, 15.0f, -15.0f)));
 	Transform* rightWallRotation = new Transform(glm::rotate(glm::radians<float>(90.0f), glm::vec3(0, 0, 1)));
 	Transform* rightWallTranslation = new Transform(translation(glm::vec3(15.0f, 15.0f, 0)));
+	Transform* topWallRotation = new Transform(glm::rotate(glm::radians<float>(180), glm::vec3(1, 0, 0)));
+	Transform* topWallTranslation = new Transform(translation(glm::vec3(0.0f, 30.0f, 0)));
+	Transform* frontWallRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(1, 0, 0)));
+	Transform* frontWallTranslation = new Transform(translation(glm::vec3(0, 15.0f, 15.0f)));
 	//Geode* roomGeode = new Geode("room", &renderer);
 	Geode* floorGeode = new Geode("plane", &renderer);
 	Geode* wallGeode = new Geode("plane", &renderer);
 	Geode* rightWallGeode = new Geode("plane", &renderer);
 	Geode* backWallGeode = new Geode("plane", &renderer);
+	Geode* topWallGeode = new Geode("plane", &renderer);
+	Geode* frontWallGeode = new Geode("plane", &renderer);
 	Geode* ballGeode = new Geode("sphere", &renderer);
 	Geode* ballGeode2 = new Geode("sphere", &renderer);
 	//roomGeode->setTextureID(TextureManager::getTexture("face"));
@@ -130,6 +138,8 @@ int main(int argc, char* argv[])
 	wallGeode->setTextureID(TextureManager::getTexture("left"));
 	rightWallGeode->setTextureID(TextureManager::getTexture("right"));
 	backWallGeode->setTextureID(TextureManager::getTexture("back"));
+	topWallGeode->setTextureID(TextureManager::getTexture("top"));
+	frontWallGeode->setTextureID(TextureManager::getTexture("front"));
 	ballGeode->setTextureID(TextureManager::getTexture("tiled"));
 	ballGeode2->setTextureID(TextureManager::getTexture("kalas"));
 	root.addChild(rotation);
@@ -148,6 +158,12 @@ int main(int argc, char* argv[])
 	wallSwitch.addChild(backWallTranslation);
 	backWallTranslation->addChild(backWallRotation);
 	backWallRotation->addChild(backWallGeode);
+	wallSwitch.addChild(frontWallTranslation);
+	frontWallTranslation->addChild(frontWallRotation);
+	frontWallRotation->addChild(frontWallGeode);
+	wallSwitch.addChild(topWallTranslation);
+	topWallTranslation->addChild(topWallRotation);
+	topWallRotation->addChild(topWallGeode);
 
 	glm::vec3 velocity;
 	glm::vec3 velocity2;
@@ -165,10 +181,10 @@ int main(int argc, char* argv[])
 
 		camera.input(dt);
 		
-		*rotation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
+		//*rotation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
 		if (glGetError())
 			std::cout << "7: " << glGetError() << std::endl;
-#if 0
+#if 1
 		velocity += gravity * dt;
 		velocity2 += gravity * dt;
 		upTranslation->translate(velocity * dt);
@@ -189,34 +205,21 @@ int main(int argc, char* argv[])
 		}
 #endif
 
-#if 0
-		SpotLight* sl = (SpotLight*)lights[0];
+#if 1
+		PointLight* pl = pointLights[0];
 		//glm::vec3 toOrigin = glm::normalize(glm::vec3(0, 0, 0) - sl->getPosition());
 		if (Input::isKeyDown(SDLK_i))
-			sl->translate(glm::vec3(0, 1, 0) * speed * dt);
+			pl->translate(glm::vec3(0, 1, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_k))
-			sl->translate(glm::vec3(0, -1, 0) * speed * dt);
+			pl->translate(glm::vec3(0, -1, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_j))
-			sl->translate(glm::vec3(-1, 0, 0) * speed * dt);
+			pl->translate(glm::vec3(-1, 0, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_l))
-			sl->translate(glm::vec3(1, 0, 0) * speed * dt);
+			pl->translate(glm::vec3(1, 0, 0) * speed * dt);
 		if (Input::isKeyDown(SDLK_p))
-			sl->translate(glm::vec3(0, 0, -1) * speed * dt);
+			pl->translate(glm::vec3(0, 0, -1) * speed * dt);
 		if (Input::isKeyDown(SDLK_SEMICOLON))
-			sl->translate(glm::vec3(0, 0, 1) * speed * dt);
-		if (Input::isKeyDown(SDLK_COMMA))
-			sl->rotate(glm::vec3(0, 1, 0), CAMERA_ROTATION * dt);
-		if (Input::isKeyDown(SDLK_PERIOD))
-			sl->rotate(glm::vec3(0, 1, 0), -CAMERA_ROTATION * dt);
-		
-		if (Input::isKeyJustPressed(SDLK_u))
-			cameraOnLight = !cameraOnLight;
-
-		//point the spotlight towards the origin
-		//sl->setDirection(-spotLight.getPosition());
-
-		if (cameraOnLight)
-			camera.set(sl->getPosition(), sl->getPosition() + sl->getDirection(), glm::vec3(0, 1, 0));
+			pl->translate(glm::vec3(0, 0, 1) * speed * dt);
 #endif
 		
 		if (Input::isKeyJustPressed(SDLK_1))
@@ -231,12 +234,6 @@ int main(int argc, char* argv[])
 			camera.set(pointLightFbos[0]->m_Faces[4].camera.getPosition(), pointLightFbos[0]->m_Faces[4].camera.getLookAt(), pointLightFbos[0]->m_Faces[4].camera.getUp());
 		if (Input::isKeyJustPressed(SDLK_6))
 			camera.set(pointLightFbos[0]->m_Faces[5].camera.getPosition(), pointLightFbos[0]->m_Faces[5].camera.getLookAt(), pointLightFbos[0]->m_Faces[5].camera.getUp());
-		if (Input::isKeyJustPressed(SDLK_t))
-		{
-			pointLights[0]->setActive(!pointLights[0]->isActive());
-		}
-		if (Input::isKeyJustPressed(SDLK_p))
-			wallSwitch.setEnabled(!wallSwitch.isEnabled());
 
 		
 		glCullFace(GL_FRONT);
