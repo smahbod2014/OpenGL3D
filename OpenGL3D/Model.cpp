@@ -4,6 +4,10 @@
 #include "OBJLoader.h"
 #include "VBOIndexer.h"
 #include <iostream>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <ctime>
 
 Model::Model()
 {
@@ -39,100 +43,82 @@ void Model::loadTexture(const char* path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void Model::generate(float* vertices, float* texCoords, float* normals, unsigned int* indices, int numVertices, int indexCount)
+void Model::loadArbitrary(float* verts, float* texCoords, float* normals, unsigned int* ind, int numVertices, int indexCount)
 {
-	m_NumIndices = indexCount;
+	std::vector<VertexData> vertices;
+	std::vector<unsigned int> indices;
 
-	glGenVertexArrays(1, &m_Vao);
-	glBindVertexArray(m_Vao);
-
-	glGenBuffers(1, &m_Vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
-
-	VertexData* vertexData = new VertexData[numVertices];
 	for (int i = 0; i < numVertices; i++)
 	{
-		memcpy(&vertexData[i].vertex, &vertices[i * 3], 12);
-		memcpy(&vertexData[i].uv, &texCoords[i * 2], 8);
-		memcpy(&vertexData[i].normal, &normals[i * 3], 12);
+		VertexData vd;
+		vd.vertex = glm::vec3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+		vd.uv = glm::vec2(texCoords[i * 2], texCoords[i * 2 + 1]);
+		vd.normal = glm::vec3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+		vertices.push_back(vd);
 	}
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData) * numVertices, vertexData, GL_STATIC_DRAW);
+	for (int i = 0; i < indexCount; i++)
+		indices.push_back(ind[i]);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, vertex));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, uv));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, normal));
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-	glGenBuffers(1, &m_Ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * m_NumIndices, indices, GL_STATIC_DRAW);
-
-	delete[] vertexData;
+	generate(vertices, indices);
 }
 
-void Model::generate(const std::string& filepath)
+void Model::loadFromFile(const std::string& filepath)
 {
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-	bool success = loadOBJ(filepath.c_str(), vertices, uvs, normals);
-	assert(success);
+	Assimp::Importer importer;
 
-	std::vector<unsigned int> indices;
-	std::vector<glm::vec3> indexed_vertices;
-	std::vector<glm::vec2> indexed_uvs;
-	std::vector<glm::vec3> indexed_normals;
-	indexVBO(vertices, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
+	clock_t begin = clock();
+	
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate
+											 | aiProcess_GenSmoothNormals
+											 | aiProcess_FlipUVs);
 
-	m_NumIndices = indices.size();
-
-	VertexData* vd = new VertexData[indexed_vertices.size()];
-	for (size_t i = 0; i < indexed_vertices.size(); i++)
+	if (!scene)
 	{
-		vd[i].vertex = indexed_vertices[i];
-		vd[i].uv = indexed_uvs[i];
-		vd[i].normal = indexed_normals[i];
+		std::cout << "ERROR: Couldn't load model: " << filepath << std::endl;
+		assert(0);
 	}
 
-	glGenVertexArrays(1, &m_Vao);
-	glBindVertexArray(m_Vao);
+	const aiMesh* model = scene->mMeshes[0];
 
-	glGenBuffers(1, &m_Vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
+	std::vector<VertexData> vertices;
+	std::vector<unsigned int> indices;
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData) * indexed_vertices.size(), vd, GL_STATIC_DRAW);
+	const aiVector3D aiZeroVector(0.0f, 0.0f, 0.0f);
+	for (unsigned int i = 0; i < model->mNumVertices; i++)
+	{
+		const aiVector3D& pos = model->mVertices[i];
+		const aiVector3D& normal = model->mNormals[i];
+		const aiVector3D& texCoord = model->HasTextureCoords(0) ? model->mTextureCoords[0][i] : aiZeroVector;
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+		vertices.push_back(VertexData());
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, vertex));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, uv));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, normal));
+		VertexData& vdRef = vertices.back();
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
+		memcpy(&vdRef.vertex, &pos, 12);
+		memcpy(&vdRef.uv, &texCoord, 8);
+		memcpy(&vdRef.normal, &normal, 12);
+	}
+	
+	for (unsigned int i = 0; i < model->mNumFaces; i++)
+	{
+		const aiFace& face = model->mFaces[i];
+		assert(face.mNumIndices == 3);
+		indices.push_back(face.mIndices[0]);
+		indices.push_back(face.mIndices[1]);
+		indices.push_back(face.mIndices[2]);
+	}
 
-	glGenBuffers(1, &m_Ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * m_NumIndices, indices.data(), GL_STATIC_DRAW);
+	double elapsed = double(clock() - begin) / CLOCKS_PER_SEC;
+	std::cout << "Done loading " << filepath << ". Took " << elapsed << " seconds." << std::endl;
 
-	delete[] vd;
+	generate(vertices, indices);
 }
 
-void Model::generate(float size)
+void Model::loadPlane(float size)
 {
 	float half = size / 2.0f;
-	float vertices[] =
+	float verts[] =
 	{
 		-half, 0, -half,
 		-half, 0, half,
@@ -150,14 +136,56 @@ void Model::generate(float size)
 		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
 	};
 
-	unsigned int indices[] =
+	unsigned int ind[] =
 	{
 		0, 1, 2, 2, 3, 0
 	};
 
-	int numVertices = 4, numIndices = 6;
+	std::vector<VertexData> vertices;
+	std::vector<unsigned int> indices;
 
-	generate(vertices, texCoords, normals, indices, numVertices, numIndices);
+	for (int i = 0; i < 4; i++)
+	{
+		VertexData vd;
+		vd.vertex = glm::vec3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+		vd.uv = glm::vec2(texCoords[i * 2], texCoords[i * 2 + 1]);
+		vd.normal = glm::vec3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+		vertices.push_back(vd);
+	}
+
+	for (int i = 0; i < 6; i++)
+		indices.push_back(ind[i]);
+
+	generate(vertices, indices);
+}
+
+void Model::generate(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices)
+{
+	m_NumIndices = indices.size();
+
+	glGenVertexArrays(1, &m_Vao);
+	glBindVertexArray(m_Vao);
+
+	glGenBuffers(1, &m_Vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, vertex));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, uv));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, normal));
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
+	glGenBuffers(1, &m_Ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 }
 
 void Model::bindTexture(int i)

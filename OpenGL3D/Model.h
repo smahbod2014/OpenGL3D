@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <string>
+#include <vector>
 
 struct VertexData
 {
@@ -19,9 +20,10 @@ public:
 	~Model();
 
 	void loadTexture(const char* path);
-	void generate(const std::string& filepath);
-	void generate(float size);
-	void generate(float* vertices, float* texCoords, float* normals, unsigned int* indices, int numVertices, int indexCount);
+	void loadPlane(float size);
+	void loadArbitrary(float* verts, float* texCoords, float* normals, unsigned int* ind, int numVertices, int indexCount);
+	void generate(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices);
+	void loadFromFile(const std::string& filepath);
 	void bindTexture(int i);
 
 	void setTextureID(GLuint texID) { m_TexID = texID; }

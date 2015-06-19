@@ -1,6 +1,6 @@
 #version 400 core
 
-const int NUM_SPOT_LIGHTS = 2;
+const int MAX_SPOT_LIGHTS = 2;
 
 /*in vec3 position;
 in vec2 texCoord;
@@ -11,14 +11,15 @@ layout (location = 2) in vec3 normal;
 
 uniform mat4 M = mat4(1.0);
 uniform mat4 VP;
-uniform mat4 spotLightVP[NUM_SPOT_LIGHTS];
+uniform mat4 spotLightVP[MAX_SPOT_LIGHTS];
+uniform mat4 directionalLightVP;
 
 
 out vec2 outTexCoord;
 out vec3 outNormal;
 out vec3 outWorldPosition;
-out vec4 spotLightSpacePos[NUM_SPOT_LIGHTS];
-
+out vec4 spotLightSpacePos[MAX_SPOT_LIGHTS];
+out vec4 directionalLightSpacePos;
 
 void main()
 {
@@ -29,6 +30,9 @@ void main()
 	outWorldPosition = worldPosition.xyz;
 	
 	//Calculate the vertex's position as seen from the spot light source
-	for (int i = 0; i < NUM_SPOT_LIGHTS; i++)
+	for (int i = 0; i < MAX_SPOT_LIGHTS; i++)
 		spotLightSpacePos[i] = spotLightVP[i] * worldPosition;
+		
+	//same thing but for the directional light, if any
+	directionalLightSpacePos = directionalLightVP * worldPosition;
 }

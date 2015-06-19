@@ -29,8 +29,9 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 	//create the frame buffer
 	glGenFramebuffers(1, &m_Fbo);
 
-	if (glGetError())
-		std::cout << "1: " << glGetError() << std::endl;
+	GLenum error = glGetError();
+	if (error)
+		std::cout << "1: " << error << std::endl;
 	
 	//create the depth buffer
 	glGenTextures(1, &m_Depth);
@@ -42,8 +43,8 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	if (glGetError())
-		std::cout << "2: " << glGetError() << std::endl;
+	if (error = glGetError())
+		std::cout << "2: " << error << std::endl;
 
 	glGenTextures(1, &m_ShadowMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_ShadowMap);
@@ -53,20 +54,20 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	if (glGetError())
-		std::cout << "3: " << glGetError() << std::endl;
+	if (error = glGetError())
+		std::cout << "3: " << error << std::endl;
 
 	for (int i = 0; i < 6; i++)
 	{
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, WindowWidth, WindowHeight, 0, GL_RED, GL_FLOAT, NULL);
-		if (glGetError())
-			std::cout << "4: (" << i << ") " << glGetError() << std::endl;
+		if (error = glGetError())
+			std::cout << "4: (" << i << ") " << error << std::endl;
 	}
 	
-	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	if (glGetError())
-		std::cout << "5: " << glGetError() << std::endl;
+	if (error = glGetError())
+		std::cout << "5: " << error << std::endl;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_Fbo);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_Depth, 0);
@@ -105,8 +106,8 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 		m_Faces.push_back(cd);
 	}
 
-	if (glGetError())
-		std::cout << "6: " << glGetError() << std::endl;
+	if (error = glGetError())
+		std::cout << "6: " << error << std::endl;
 
 	return true;
 }

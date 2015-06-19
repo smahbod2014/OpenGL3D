@@ -15,11 +15,12 @@ void ModelCache::loadModel(const std::string& alias, const std::string& path)
 
 	//delete this at some point
 	Model* model = new Model();
-	model->generate(path);
+	//model->generate(path);
+	model->loadFromFile(path);
 	m_Cache[alias] = model;
 }
 
-void ModelCache::loadModel(const std::string& alias, float size)
+void ModelCache::loadPlane(const std::string& alias, float size)
 {
 	if (m_Cache.find(alias) != m_Cache.end())
 	{
@@ -29,7 +30,7 @@ void ModelCache::loadModel(const std::string& alias, float size)
 
 	//delete this at some point
 	Model* model = new Model();
-	model->generate(size);
+	model->loadPlane(size);
 	m_Cache[alias] = model;
 }
 

@@ -40,28 +40,33 @@ struct SpotLight
 const int POINT_LIGHT = 0;
 const int SPOT_LIGHT = 1;
 
-const int NUM_SPOT_LIGHTS = 5;
-const int NUM_POINT_LIGHTS = 1;
+const int MAX_SPOT_LIGHTS = 2;
+const int MAX_POINT_LIGHTS = 3;
 const vec4 dummy = vec4(0.0, 0.0, 0.0, 0.0);
 
 in vec3 outWorldPosition;
 in vec2 outTexCoord;
 in vec3 outNormal;
-in vec4 spotLightSpacePos[NUM_SPOT_LIGHTS];
+in vec4 spotLightSpacePos[MAX_SPOT_LIGHTS];
+in vec4 directionalLightSpacePos;
 
 out vec4 finalColor;
 
 uniform sampler2D sampler;
-uniform sampler2D gShadowMap[NUM_SPOT_LIGHTS];
-uniform samplerCube gShadowCubeMap[NUM_POINT_LIGHTS];
-uniform SpotLight spotLights[NUM_SPOT_LIGHTS];
-uniform PointLight pointLights[NUM_POINT_LIGHTS];
+uniform sampler2D gShadowMap[MAX_SPOT_LIGHTS];
+uniform sampler2D directionalShadowMap;
+uniform samplerCube gShadowCubeMap[MAX_POINT_LIGHTS];
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform DirectionalLight directionalLight;
 
 
 float calcShadowFactor(vec4 lightSpacePos, int i);
+float calcShadowFactorDirectional(vec4 lightSpacePos, float bias);
 float calcShadowFactorCube(vec3 lightDirection, int i);
 vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i, int baseLightType);
 vec4 calcSpotLight(SpotLight sl, vec4 lightSpacePos, int i);
+vec4 calcDirectionalLight(DirectionalLight dl, vec4 direcLightSpacePos);
 
 void main()
 {
@@ -69,15 +74,29 @@ void main()
 	vec4 ambient = vec4(0.2, 0.2, 0.2, 1.0);
 	vec4 totalLighting = vec4(0.0, 0.0, 0.0, 0.0);
 	
-	for (int i = 0; i < NUM_SPOT_LIGHTS; i++)
+	if (directionalLight.base.isActive == 1)
+		totalLighting += calcDirectionalLight(directionalLight, directionalLightSpacePos);
+	
+	for (int i = 0; i < MAX_SPOT_LIGHTS; i++)
 		if (spotLights[i].base.base.isActive == 1)
 			totalLighting += calcSpotLight(spotLights[i], spotLightSpacePos[i], i);
 	
-	for (int i = 0; i < NUM_POINT_LIGHTS; i++)
+	for (int i = 0; i < MAX_POINT_LIGHTS; i++)
 		if (pointLights[i].base.isActive == 1)
 			totalLighting += calcPointLight(pointLights[i], dummy, i, POINT_LIGHT);
 	
 	finalColor = textureColor * clamp(totalLighting + ambient, 0.0, 1.0);
+}
+
+vec4 calcDirectionalLight(DirectionalLight dl, vec4 direcLightSpacePos)
+{
+	vec3 toLightVector = -dl.direction;
+	float dotFactor = dot(outNormal, toLightVector);
+	float coeff = max(0.0, dotFactor);
+	float bias = 0.005 * tan(acos(dotFactor));
+	bias = clamp(bias, 0.003, 0.01);
+	float shadowFactor = calcShadowFactorDirectional(direcLightSpacePos, bias);
+	return vec4(dl.base.color * coeff * shadowFactor, 1.0);
 }
 
 vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i, int baseLightType)
@@ -123,7 +142,21 @@ float calcShadowFactor(vec4 lightSpacePos, int i)
 	uvCoords.y = 0.5 * projectedCoords.y + 0.5;
 	float z = 0.5 * projectedCoords.z + 0.5;
 	float depth = texture(gShadowMap[i], uvCoords).x;
-	if (depth < z)
+	if (depth < z - 0.0001)
+		return 0.5;
+	else
+		return 1.0;
+}
+
+float calcShadowFactorDirectional(vec4 lightSpacePos, float bias)
+{
+	vec3 projectedCoords = lightSpacePos.xyz / lightSpacePos.w;
+	vec2 uvCoords;
+	uvCoords.x = 0.5 * projectedCoords.x + 0.5;
+	uvCoords.y = 0.5 * projectedCoords.y + 0.5;
+	float z = 0.5 * projectedCoords.z + 0.5;
+	float depth = texture(directionalShadowMap, uvCoords).x;
+	if (depth < z - bias)
 		return 0.5;
 	else
 		return 1.0;
@@ -133,7 +166,7 @@ float calcShadowFactorCube(vec3 toFragVector, int i)
 {
 	float sampledDistance = texture(gShadowCubeMap[i], toFragVector).r;
 	float dist = length(toFragVector);
-	if (dist < sampledDistance + 0.00000)
+	if (dist < sampledDistance + 0.0001)
 		return 1.0;
 	else
 		return 0.5;

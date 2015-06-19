@@ -14,48 +14,46 @@ ShadowMapFBO::ShadowMapFBO()
 
 ShadowMapFBO::~ShadowMapFBO()
 {
-	if (m_FBOs)
-	{
-		glDeleteFramebuffers(m_NumBuffers, m_FBOs);
-		delete[] m_FBOs;
-	}
-	if (m_ShadowMaps)
-	{
-		glDeleteTextures(m_NumBuffers, m_ShadowMaps);
-		delete[] m_ShadowMaps;
-	}
+	if (m_Fbo)
+		glDeleteFramebuffers(1, &m_Fbo);
+	if (m_ShadowMap)
+		glDeleteTextures(1, &m_ShadowMap);
 }
 
-bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, int numBuffers)
+bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 {
-	m_NumBuffers = numBuffers;
-	m_FBOs = new GLuint[numBuffers];
-	m_ShadowMaps = new GLuint[numBuffers];
+	glGenFramebuffers(1, &m_Fbo);
+	glGenTextures(1, &m_ShadowMap);
 
-	glGenFramebuffers(numBuffers, m_FBOs);
-	glGenTextures(numBuffers, m_ShadowMaps);
+	GLenum error;
 
-	for (int i = 0; i < numBuffers; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_ShadowMaps[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	if (error = glGetError())
+		std::cout << "8: " << error << std::endl;
 
-		glBindFramebuffer(GL_FRAMEBUFFER, m_FBOs[i]);
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowMaps[i], 0);
+	glBindTexture(GL_TEXTURE_2D, m_ShadowMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WindowWidth, WindowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+	if (error = glGetError())
+		std::cout << "9: " << error << std::endl;
 
-		GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_Fbo);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowMap, 0);
 
-		if (Status != GL_FRAMEBUFFER_COMPLETE) {
-			printf("FB error, status: 0x%x\n", Status);
-			return false;
-		}
+	if (error = glGetError())
+		std::cout << "10: " << error << std::endl;
+
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		printf("FB error, status: 0x%x\n", Status);
+		return false;
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -63,14 +61,13 @@ bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, int
 	return true;
 }
 
-void ShadowMapFBO::BindForWriting(int i)
+void ShadowMapFBO::BindForWriting()
 {
-	assert(i < m_NumBuffers);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FBOs[i]);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Fbo);
 }
 
 void ShadowMapFBO::BindForReading(int i)
 {
 	glActiveTexture(GL_TEXTURE0 + i);
-	glBindTexture(GL_TEXTURE_2D, m_ShadowMaps[i - SHADOW_BASE_INDEX]);
+	glBindTexture(GL_TEXTURE_2D, m_ShadowMap);
 }

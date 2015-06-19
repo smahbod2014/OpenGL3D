@@ -102,6 +102,9 @@
     <ClCompile Include="Switch.cpp">
       <Filter>Source Files\SceneGraph</Filter>
     </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Source Files\Lighting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -175,6 +178,9 @@
     </ClInclude>
     <ClInclude Include="Group.h">
       <Filter>Source Files\SceneGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Source Files\Lighting</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

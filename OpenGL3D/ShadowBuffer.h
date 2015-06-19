@@ -11,14 +11,13 @@ public:
 	ShadowMapFBO();
 	~ShadowMapFBO();
 
-	bool Init(unsigned int WindowWidth, unsigned int WindowHeight, int numBuffers);
+	bool Init(unsigned int WindowWidth, unsigned int WindowHeight);
 
-	void BindForWriting(int i);
+	void BindForWriting();
 
 	void BindForReading(int i);
 
 private:
-	GLuint* m_FBOs = nullptr;
-	GLuint* m_ShadowMaps = nullptr;
-	int m_NumBuffers;
+	GLuint m_Fbo = 0;
+	GLuint m_ShadowMap = 0;
 };
