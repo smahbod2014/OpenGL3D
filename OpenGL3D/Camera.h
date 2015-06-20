@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <iostream>
 
 class Camera
 {
@@ -22,7 +23,9 @@ public:
 	const glm::vec3& getLookAt() const { return m_LookAt; }
 	const glm::vec3& getUp() const { return m_Up; }
 	const glm::vec3& getWorldUp() const { return m_WorldUp; }
+	const glm::vec3& getForward() const { return m_Forward; }
 
+	friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 private:
 	glm::mat4 m_ViewMatrix;
 	glm::mat4 m_InverseViewMatrix;

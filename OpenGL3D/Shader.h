@@ -18,6 +18,7 @@ public:
 	void setUniform1(const std::string& uniformName, float value);
 	void setUniform1(const std::string& uniformName, int value);
 	void setUniform1(const std::string& uniformName, unsigned int value);
+	void setUniform2(const std::string& uniformName, const glm::vec2& values);
 	void setUniform3(const std::string& uniformName, const glm::vec3& values);
 	void setUniformMatrix4(const std::string& uniformName, const glm::mat4& matrix);
 private:

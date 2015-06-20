@@ -27,10 +27,14 @@ public:
 	void BindForReading(int i);
 
 	void setLightPosition(const glm::vec3& position);
+
+	unsigned int getWidth() const { return m_Width; }
+	unsigned int getHeight() const { return m_Height; }
 private:
 	GLuint m_Fbo;
 	GLuint m_ShadowMap;
 	GLuint m_Depth;
+	unsigned int m_Width, m_Height;
 public:
 	static glm::mat4 s_Projection;
 	std::vector<CameraDirection> m_Faces;

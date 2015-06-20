@@ -17,7 +17,10 @@ public:
 
 	void BindForReading(int i);
 
+	unsigned int getWidth() const { return m_Width; }
+	unsigned int getHeight() const { return m_Height; }
 private:
 	GLuint m_Fbo = 0;
 	GLuint m_ShadowMap = 0;
+	unsigned int m_Width, m_Height;
 };

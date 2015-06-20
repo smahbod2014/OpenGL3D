@@ -104,3 +104,8 @@ void Camera::set(const glm::vec3& position, const glm::vec3& lookAt, const glm::
 	m_WorldUp = worldUp;
 	update();
 }
+
+std::ostream& operator<<(std::ostream& os, const Camera& camera)
+{
+	return os << "Camera position: " << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z;
+}

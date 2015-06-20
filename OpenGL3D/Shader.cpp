@@ -128,7 +128,7 @@ GLint Shader::lookup(const std::string& uniformName)
 		//insert into cache
 		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName.c_str());
 
-		//std::cout << "Caching (" << m_UniformCache[uniformName] << "): " << uniformName << std::endl;
+		std::cout << "Caching (" << m_UniformCache[uniformName] << "): " << uniformName << std::endl;
 	}
 
 	return m_UniformCache[uniformName];
@@ -147,6 +147,11 @@ void Shader::setUniform1(const std::string& uniformName, int value)
 void Shader::setUniform1(const std::string& uniformName, unsigned int value)
 {
 	glUniform1i(lookup(uniformName), (int)value);
+}
+
+void Shader::setUniform2(const std::string& uniformName, const glm::vec2& values)
+{
+	glUniform2f(lookup(uniformName), values.x, values.y);
 }
 
 void Shader::setUniform3(const std::string& uniformName, const glm::vec3& values)

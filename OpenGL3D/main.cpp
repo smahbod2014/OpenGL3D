@@ -58,12 +58,15 @@ int main(int argc, char* argv[])
 	window.setMaxFPS(MAX_FPS);
 	ShadowMapCube::initProjections(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS);
 
-	ModelCache::loadPlane("plane", 30.0f);
+	ModelCache::loadModel("plane", "Models/thickplane.obj");
+	//ModelCache::loadPlane("plane", 30.0f);
 	//ModelCache::loadModel("room", "Models/room_thickwalls.obj");
 	//ModelCache::loadModel("bunny", "Models/dragon.obj");
 	ModelCache::loadModel("sphere", "Models/sphere2.obj");
 	ModelCache::loadModel("stall", "Models/stall.obj");
+	ModelCache::loadModel("cube", "Models/cube5.obj");
 	//TextureManager::loadTexture("face", "Textures/wtf face.png");
+	TextureManager::loadTexture("bricks", "Textures/bricks.png");
 	TextureManager::loadTexture("tiled", "Textures/tiled2.png");
 	TextureManager::loadTexture("kalas", "Textures/whocares.png");
 	TextureManager::loadTexture("checker", "Textures/checkerboard.png");
@@ -81,16 +84,16 @@ int main(int argc, char* argv[])
 	const glm::vec3 spotPosition1(15, 10, 2);
 	const glm::vec3 spotPosition2(0, 15, 15);
 	//SpotLight* spot1 = new SpotLight(spotPosition1, 0xdeff4cff, -spotPosition1, 15.0f, 1.0f, 0.0f, 0.0001f);
-	SpotLight* spot2 = new SpotLight(glm::vec3(-3, 5, 3), 0xff3d57ff, glm::vec3(1, 0, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
+	SpotLight* spot2 = new SpotLight(glm::vec3(0, 10, -8), 0xff3d57ff, glm::vec3(1, -1.5, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
 	//SpotLight* spot3 = new SpotLight(glm::vec3(10, 5, 0), 0xffffffff, glm::vec3(-1, 0, 0), 20.0f, 1.0f, 0.0f, 0.0001f);
 	PointLight* point1 = new PointLight(glm::vec3(0, 8, 0), 0x415970ff, 1.0f, 0.0f, 0.0001f);
-	spotLights.push_back(spot2);
-	pointLights.push_back(point1);
+	//spotLights.push_back(spot2);
+	//pointLights.push_back(point1);
 
 	for (auto& it : spotLights)
 	{
 		ShadowMapFBO* fbo = new ShadowMapFBO();
-		assert(fbo->Init(width, height));
+		assert(fbo->Init(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS));
 		spotLightFbos.push_back(fbo);
 	}
 
@@ -101,7 +104,7 @@ int main(int argc, char* argv[])
 		pointLightFbos.push_back(pointLightFbo);
 	}
 
-	//directionalLight = new DirectionalLight(glm::vec3(0, 0, -1), 0xffffffff);
+	directionalLight = new DirectionalLight(glm::vec3(-1, -1, -1), 0xffffffff, 60.0f);
 
 	if (directionalLight)
 		assert(directionalLightFbo.Init(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS));
@@ -116,6 +119,8 @@ int main(int argc, char* argv[])
 	P = glm::perspective<float>(glm::radians<float>(60.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
 	lightShader.bind();
+	lightShader.setUniform1("shadowMapBias", 0.01f / CUBE_MAP_DIMENSIONS);
+	lightShader.setUniform2("shadowMapTexelSize", glm::vec2(1.0f / CUBE_MAP_DIMENSIONS));
 	lightShader.setUniform1("sampler", TEXTURE_INDEX);
 	for (size_t i = 0; i < spotLights.size(); i++)
 	{
@@ -135,8 +140,12 @@ int main(int argc, char* argv[])
 	lightShader.unbind();
 
 	Transform* rotation = new Transform();
-	Transform* upTranslation = new Transform(translation(0, -0.5, 8));
+	Transform* upTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* upTranslation2 = new Transform(translation(-7.5f, 8, 0));
+	Transform* cubeTranslation = new Transform(translation(5, 1.0f, -2));
+	Transform* cubeRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(1, 0, 0)));
+	Transform* secondFloorTranslation = new Transform(translation(50, 0, -20));
+	Transform* secondStallTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* myRotation = new Transform();
 	Transform* wallRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(0, 0, 1)));
 	Transform* wallTranslation = new Transform(translation(glm::vec3(-15.0f, 15.0f, 0)));
@@ -150,22 +159,28 @@ int main(int argc, char* argv[])
 	Transform* frontWallTranslation = new Transform(translation(glm::vec3(0, 15.0f, 15.0f)));
 	//Geode* roomGeode = new Geode("room", &renderer);
 	Geode* floorGeode = new Geode("plane", &renderer);
-	Geode* wallGeode = new Geode("plane", &renderer);
+	Geode* leftWallGeode = new Geode("plane", &renderer);
 	Geode* rightWallGeode = new Geode("plane", &renderer);
 	Geode* backWallGeode = new Geode("plane", &renderer);
 	Geode* topWallGeode = new Geode("plane", &renderer);
 	Geode* frontWallGeode = new Geode("plane", &renderer);
 	Geode* ballGeode = new Geode("stall", &renderer);
 	Geode* ballGeode2 = new Geode("sphere", &renderer);
+	Geode* secondFloorGeode = new Geode("plane", &renderer);
+	Geode* secondStall = new Geode("stall", &renderer);
+	Geode* cubeGeode = new Geode("cube", &renderer);
 	//roomGeode->setTextureID(TextureManager::getTexture("face"));
 	floorGeode->setTextureID(TextureManager::getTexture("bottom"));
-	wallGeode->setTextureID(TextureManager::getTexture("left"));
+	cubeGeode->setTextureID(TextureManager::getTexture("bricks"));
+	leftWallGeode->setTextureID(TextureManager::getTexture("left"));
 	rightWallGeode->setTextureID(TextureManager::getTexture("right"));
 	backWallGeode->setTextureID(TextureManager::getTexture("back"));
 	topWallGeode->setTextureID(TextureManager::getTexture("top"));
 	frontWallGeode->setTextureID(TextureManager::getTexture("front"));
 	ballGeode->setTextureID(TextureManager::getTexture("stallTex"));
 	ballGeode2->setTextureID(TextureManager::getTexture("kalas"));
+	secondFloorGeode->setTextureID(TextureManager::getTexture("checker"));
+	secondStall->setTextureID(TextureManager::getTexture("stallTex"));
 	root.addChild(rotation);
 	rotation->addChild(&wallSwitch);
 	wallSwitch.addChild(floorGeode);
@@ -176,19 +191,26 @@ int main(int argc, char* argv[])
 	upTranslation2->addChild(ballGeode2);
 	wallSwitch.addChild(wallTranslation);
 	wallTranslation->addChild(wallRotation);
-	wallRotation->addChild(wallGeode);
+	wallRotation->addChild(leftWallGeode);
 	wallSwitch.addChild(rightWallTranslation);
 	rightWallTranslation->addChild(rightWallRotation);
-	rightWallRotation->addChild(rightWallGeode);
+	//rightWallRotation->addChild(rightWallGeode);
 	wallSwitch.addChild(backWallTranslation);
 	backWallTranslation->addChild(backWallRotation);
-	backWallRotation->addChild(backWallGeode);
+	//backWallRotation->addChild(backWallGeode);
 	wallSwitch.addChild(frontWallTranslation);
 	frontWallTranslation->addChild(frontWallRotation);
-	frontWallRotation->addChild(frontWallGeode);
+	//frontWallRotation->addChild(frontWallGeode);
 	wallSwitch.addChild(topWallTranslation);
 	topWallTranslation->addChild(topWallRotation);
-	topWallRotation->addChild(topWallGeode);
+	//topWallRotation->addChild(topWallGeode);
+	root.addChild(secondFloorTranslation);
+	secondFloorTranslation->addChild(secondFloorGeode);
+	secondFloorTranslation->addChild(secondStallTranslation);
+	secondStallTranslation->addChild(secondStall);
+	rotation->addChild(cubeTranslation);
+	cubeTranslation->addChild(cubeRotation);
+	cubeRotation->addChild(cubeGeode);
 
 	Transform* lightTranslation = new Transform(translation(point1->getPosition()));
 	Transform* lightScale = new Transform(glm::scale(glm::vec3(0.5f, 0.5f, 0.5f)));
@@ -197,6 +219,8 @@ int main(int argc, char* argv[])
 	lightRoot.addChild(lightTranslation);
 	lightTranslation->addChild(lightScale);
 	lightScale->addChild(lightGeode);
+
+	//root.translate(glm::vec3(0, -15.0f, 0));
 
 	glm::vec3 velocity;
 	glm::vec3 velocity2;
@@ -217,6 +241,9 @@ int main(int argc, char* argv[])
 		*myRotation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
 		if (error = glGetError())
 			std::cout << "7: " << glGetError() << std::endl;
+
+		if (directionalLight)
+			directionalLight->setCameraPosition(camera);
 #if 0
 		velocity += gravity * dt;
 		velocity2 += gravity * dt;
@@ -284,6 +311,10 @@ int main(int argc, char* argv[])
 			camera.set(pointLightFbos[0]->m_Faces[4].camera.getPosition(), pointLightFbos[0]->m_Faces[4].camera.getLookAt(), pointLightFbos[0]->m_Faces[4].camera.getUp());
 		if (Input::isKeyJustPressed(SDLK_6))
 			camera.set(pointLightFbos[0]->m_Faces[5].camera.getPosition(), pointLightFbos[0]->m_Faces[5].camera.getLookAt(), pointLightFbos[0]->m_Faces[5].camera.getUp());
+		if (Input::isKeyJustPressed(SDLK_7))
+			camera.set(spot2->getPosition(), spot2->getPosition() + spot2->getDirection(), glm::vec3(0, 1, 0));
+		if (Input::isKeyJustPressed(SDLK_8))
+			std::cout << camera << std::endl;
 
 		
 		glCullFace(GL_FRONT);
@@ -316,6 +347,7 @@ void SpotLightShadowMapPass(int i)
 {
 	//all that's left is to clean this code up and make it a bit more reusable!
 	spotLightFbos[i]->BindForWriting();
+	glViewport(0, 0, spotLightFbos[i]->getWidth(), spotLightFbos[i]->getHeight());
 	root.setRenderPassIndex(i);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -337,7 +369,8 @@ void SpotLightShadowMapPass(int i)
 void DirectionalLightShadowMapPass()
 {
 	directionalLightFbo.BindForWriting();
-	glViewport(0, 0, CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS);
+	glViewport(0, 0, directionalLightFbo.getWidth(), directionalLightFbo.getHeight());
+	//wallSwitch.setEnabled(false);
 	root.setRenderPassIndex(0);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -357,9 +390,9 @@ void DirectionalLightShadowMapPass()
 void PointLightShadowMapPass(int i)
 {
 	glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-	glViewport(0, 0, CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS);
+	glViewport(0, 0, pointLightFbos[i]->getWidth(), pointLightFbos[i]->getHeight());
 	root.setRenderPassIndex(i);
-	//wallSwitch.setEnabled(false);
+	wallSwitch.setEnabled(true);
 	
 	pointLightShadowShader.bind();
 	pointLightShadowShader.setUniform3("lightWorldPos", pointLights[i]->getPosition());
@@ -381,7 +414,7 @@ void RenderPass()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, Window::getWidth(), Window::getHeight());
 	root.setRenderPassIndex(-1);
-	//wallSwitch.setEnabled(true);
+	wallSwitch.setEnabled(true);
 	
 	const glm::vec4& cc = Window::getClearColor();
 	glClearColor(cc.x, cc.y, cc.z, cc.w);

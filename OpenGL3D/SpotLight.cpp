@@ -9,7 +9,8 @@ SpotLight::SpotLight(const glm::vec3& position, const glm::vec3& color, const gl
 	setDirection(direction);
 	setCutoff(cutoff);
 	m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
-	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
+	//m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
+	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), 1.0f, 0.1f, 1000.0f);
 }
 
 SpotLight::SpotLight(const glm::vec3& position, unsigned int color, const glm::vec3& direction, float cutoff, float ca, float la, float qa) :
@@ -18,7 +19,8 @@ SpotLight::SpotLight(const glm::vec3& position, unsigned int color, const glm::v
 	setDirection(direction);
 	setCutoff(cutoff);
 	m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
-	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
+	//m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
+	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), 1.0f, 0.1f, 1000.0f);
 }
 
 SpotLight::~SpotLight()

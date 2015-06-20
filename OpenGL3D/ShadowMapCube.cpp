@@ -26,6 +26,9 @@ void ShadowMapCube::initProjections(unsigned int width, unsigned int height)
 
 bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 {
+	m_Width = WindowWidth;
+	m_Height = WindowHeight;
+
 	//create the frame buffer
 	glGenFramebuffers(1, &m_Fbo);
 
@@ -48,8 +51,8 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 
 	glGenTextures(1, &m_ShadowMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_ShadowMap);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
