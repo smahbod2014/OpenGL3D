@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include <iostream>
+#include <vector>
 
 GLuint Shader::currentlyBoundID = 0;
 
@@ -18,7 +19,11 @@ void Shader::load(const char* vert, const char* frag)
 	char* vv = read(vert);
 	char* vf = nullptr;
 	if (frag)
+	{
 		vf = read(frag);
+		fragName = std::string(frag);
+	}
+	vertName = std::string(vert);
 
 	//Setup the shader
 	setup(vv, vf);
@@ -76,6 +81,7 @@ char* Shader::read(const char *filename)
 	return shaderFile;
 }
 
+#if 0
 void Shader::setup(const char* vs, const char* fs)
 {
 	GLint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -115,10 +121,99 @@ void Shader::setup(const char* vs, const char* fs)
 
 	glLinkProgram(m_ProgramID);
 	glValidateProgram(m_ProgramID);
+
+	if (fs)
+	{
+		GLint result;
+		glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &result);
+		if (result == GL_FALSE)
+		{
+			GLint length;
+			glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &length);
+			std::vector<char> error(length);
+			glGetProgramInfoLog(m_ProgramID, length, &length, &error[0]);
+			std::cout << "Failed to link shaders! (" << vertName << ", " << fragName << ")" << std::endl;
+			printf("%s\n", &error[0]);
+			assert(false);
+		}
+	}
+	
 	glDeleteShader(vertexShader);
 	if (fs)
 		glDeleteShader(fragmentShader);
 }
+#else
+void Shader::setup(const char* vs, const char* fs)
+{
+	m_ProgramID = glCreateProgram();
+	std::cout << m_ProgramID << std::endl;
+	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragment;
+	if (fs)
+		fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(vertex, 1, &vs, NULL);
+	glCompileShader(vertex);
+
+	GLint result;
+	glGetShaderiv(vertex, GL_COMPILE_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		GLint length;
+		glGetShaderiv(vertex, GL_INFO_LOG_LENGTH, &length);
+		std::vector<char> error(length);
+		glGetShaderInfoLog(vertex, length, &length, &error[0]);
+		std::cout << "Failed to compile vertex shader!" << std::endl;
+		printf("%s\n", &error[0]);
+		glDeleteShader(vertex);
+		assert(false);
+	}
+
+	if (fs)
+	{
+		glShaderSource(fragment, 1, &fs, NULL);
+		glCompileShader(fragment);
+
+		glGetShaderiv(fragment, GL_COMPILE_STATUS, &result);
+		if (result == GL_FALSE)
+		{
+			GLint length;
+			glGetShaderiv(fragment, GL_INFO_LOG_LENGTH, &length);
+			std::vector<char> error(length);
+			glGetShaderInfoLog(fragment, length, &length, &error[0]);
+			std::cout << "Failed to compile fragment shader!" << std::endl;
+			printf("%s\n", &error[0]);
+			glDeleteShader(fragment);
+			assert(false);
+		}
+	}
+
+	glAttachShader(m_ProgramID, vertex);
+	if (fs)
+		glAttachShader(m_ProgramID, fragment);
+
+	glLinkProgram(m_ProgramID);
+
+	glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		GLint length;
+		glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &length);
+		std::vector<char> error(length);
+		glGetProgramInfoLog(m_ProgramID, length, &length, &error[0]);
+		std::cout << "Failed to link shaders! (" << vertName << ", " << fragName << ")" << std::endl;
+		printf("%s\n", &error[0]);
+		assert(false);
+	}
+	glValidateProgram(m_ProgramID);
+
+	glDeleteShader(vertex);
+	if (fs)
+		glDeleteShader(fragment);
+
+	std::cout << "Successfully compiled " << vertName << " and " << fragName << std::endl;
+}
+#endif
 
 GLint Shader::lookup(const std::string& uniformName)
 {

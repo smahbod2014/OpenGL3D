@@ -23,6 +23,7 @@ public:
 	void setUniformMatrix4(const std::string& uniformName, const glm::mat4& matrix);
 private:
 	static GLuint currentlyBoundID;
+	std::string vertName, fragName;
 
 	char* read(const char* filename);
 	void setup(const char* vs, const char* fs);

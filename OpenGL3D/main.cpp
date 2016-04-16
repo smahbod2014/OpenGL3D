@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	//ModelCache::loadModel("bunny", "Models/dragon.obj");
 	ModelCache::loadModel("sphere", "Models/sphere2.obj");
 	ModelCache::loadModel("stall", "Models/stall.obj");
-	ModelCache::loadModel("cube", "Models/cube5.obj");
+	ModelCache::loadModel("cube", "Models/dragon.obj"); //dragon
 	//TextureManager::loadTexture("face", "Textures/wtf face.png");
 	TextureManager::loadTexture("bricks", "Textures/bricks.png");
 	TextureManager::loadTexture("tiled", "Textures/tiled2.png");
@@ -84,11 +84,11 @@ int main(int argc, char* argv[])
 	const glm::vec3 spotPosition1(15, 10, 2);
 	const glm::vec3 spotPosition2(0, 15, 15);
 	//SpotLight* spot1 = new SpotLight(spotPosition1, 0xdeff4cff, -spotPosition1, 15.0f, 1.0f, 0.0f, 0.0001f);
-	SpotLight* spot2 = new SpotLight(glm::vec3(0, 10, -8), 0xff3d57ff, glm::vec3(1, -1.5, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
+	SpotLight* spot2 = new SpotLight(glm::vec3(0, 5, -8), 0xff3d57ff, glm::vec3(1, -0.5, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
 	//SpotLight* spot3 = new SpotLight(glm::vec3(10, 5, 0), 0xffffffff, glm::vec3(-1, 0, 0), 20.0f, 1.0f, 0.0f, 0.0001f);
 	PointLight* point1 = new PointLight(glm::vec3(0, 8, 0), 0x415970ff, 1.0f, 0.0f, 0.0001f);
-	//spotLights.push_back(spot2);
-	//pointLights.push_back(point1);
+	spotLights.push_back(spot2);
+	pointLights.push_back(point1);
 
 	for (auto& it : spotLights)
 	{
@@ -104,13 +104,13 @@ int main(int argc, char* argv[])
 		pointLightFbos.push_back(pointLightFbo);
 	}
 
-	directionalLight = new DirectionalLight(glm::vec3(-1, -1, -1), 0xffffffff, 60.0f);
+	//directionalLight = new DirectionalLight(glm::vec3(-1, -1, -1), 0xffffffff, 60.0f);
 
 	if (directionalLight)
 		assert(directionalLightFbo.Init(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS));
 
-	shadowShader.load("Shaders/ShadowMap.vert", nullptr);
 	lightShader.load("Shaders/Shine.vert", "Shaders/Shine.frag");
+	shadowShader.load("Shaders/ShadowMap.vert", nullptr);
 	pointLightShadowShader.load("Shaders/PointLightShadowMap.vert", "Shaders/PointLightShadowMap.frag");
 	passthroughShader.load("Shaders/Passthrough.vert", "Shaders/Passthrough.frag");
 	renderer.setShader(&lightShader);
@@ -125,7 +125,8 @@ int main(int argc, char* argv[])
 	for (size_t i = 0; i < spotLights.size(); i++)
 	{
 		spotLights[i]->setUniforms(lightShader, "spotLights[" + std::to_string(i) + "]");
-		lightShader.setUniform1("gShadowMap[" + std::to_string(i) + "]", SHADOW_BASE_INDEX + i);
+		//lightShader.setUniform1("gShadowMap[" + std::to_string(i) + "]", SHADOW_BASE_INDEX + i);
+		lightShader.setUniform1("gShadowMap[" + std::to_string(i) + "]", 1);
 	}
 	for (size_t i = 0; i < pointLights.size(); i++)
 	{
@@ -135,15 +136,16 @@ int main(int argc, char* argv[])
 	if (directionalLight)
 	{
 		directionalLight->setUniforms(lightShader, "directionalLight");
-		lightShader.setUniform1("directionalShadowMap", SHADOW_DIRECTIONAL_INDEX);
+		//lightShader.setUniform1("directionalShadowMap", SHADOW_DIRECTIONAL_INDEX);
+		lightShader.setUniform1("gShadowMap[" + std::to_string(MAX_SPOT_LIGHTS) + "]", SHADOW_DIRECTIONAL_INDEX);
 	}
 	lightShader.unbind();
 
 	Transform* rotation = new Transform();
 	Transform* upTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* upTranslation2 = new Transform(translation(-7.5f, 8, 0));
-	Transform* cubeTranslation = new Transform(translation(5, 1.0f, -2));
-	Transform* cubeRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(1, 0, 0)));
+	Transform* cubeTranslation = new Transform(translation(5, 0.0f, -2));
+	Transform* cubeRotation = new Transform(glm::rotate(glm::radians<float>(-0.0f), glm::vec3(1, 0, 0)));
 	Transform* secondFloorTranslation = new Transform(translation(50, 0, -20));
 	Transform* secondStallTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* myRotation = new Transform();
@@ -240,7 +242,7 @@ int main(int argc, char* argv[])
 
 		*myRotation *= glm::rotate(glm::radians<float>(rotateSpeed * dt), glm::vec3(0, 1, 0));
 		if (error = glGetError())
-			std::cout << "7: " << glGetError() << std::endl;
+			std::cout << "7: " << error << std::endl;
 
 		if (directionalLight)
 			directionalLight->setCameraPosition(camera);

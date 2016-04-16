@@ -53,14 +53,16 @@ in vec4 directionalLightSpacePos;
 out vec4 finalColor;
 
 uniform sampler2D sampler;
-uniform sampler2D gShadowMap[MAX_SPOT_LIGHTS + 1];
-//uniform sampler2D directionalShadowMap;
+uniform sampler2D gShadowMap[MAX_SPOT_LIGHTS];
+uniform sampler2D directionalShadowMap;
 uniform samplerCube gShadowCubeMap[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform DirectionalLight directionalLight;
 uniform float shadowMapBias;
 uniform vec2 shadowMapTexelSize;
+
+bool gShadowMapUsed = true;
 
 //forward declarations
 bool inRange(float val);
@@ -70,9 +72,9 @@ float calcShadowFactorCube(vec3 lightDirection, int i);
 vec4 calcPointLight(PointLight pl, vec4 lightSpacePos, int i, int baseLightType);
 vec4 calcSpotLight(SpotLight sl, vec4 lightSpacePos, int i);
 vec4 calcDirectionalLight(DirectionalLight dl, vec4 direcLightSpacePos);
-float sampleShadowMap(int index, vec2 uv, float compare);
-float sampleShadowMapLinear(int index, vec2 coords, float compare, vec2 texelSize);
-float sampleShadowMapPCF(int index, vec2 coords, float compare, vec2 texelSize);
+float sampleShadowMap(sampler2D shadowMap, vec2 uv, float compare);
+float sampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize);
+float sampleShadowMapPCF(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize);
 
 //begin
 void main()
@@ -92,7 +94,10 @@ void main()
 		if (pointLights[i].base.isActive == 1)
 			totalLighting += calcPointLight(pointLights[i], dummy, i, POINT_LIGHT);
 	
-	finalColor = textureColor * clamp(totalLighting + ambient, 0.0, 1.0);
+	if (gShadowMapUsed)
+		finalColor = textureColor * clamp(totalLighting + ambient, 0.0, 1.0);
+	else
+		finalColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 vec4 calcDirectionalLight(DirectionalLight dl, vec4 direcLightSpacePos)
@@ -149,11 +154,11 @@ float calcShadowFactor(vec4 lightSpacePos, int i)
 	uvCoords.y = 0.5 * projectedCoords.y + 0.5;
 	float z = 0.5 * projectedCoords.z + 0.5;
 
-	//return sampleShadowMap(i, uvCoords, z - shadowMapBias);
+	//return sampleShadowMap(gShadowMap[i], uvCoords, z - shadowMapBias);
 
-	return sampleShadowMapLinear(i, uvCoords, z - shadowMapBias, shadowMapTexelSize);
+	return sampleShadowMapLinear(gShadowMap[i], uvCoords, z - shadowMapBias, shadowMapTexelSize);
 
-	//return sampleShadowMapPCF(i, uvCoords, z - shadowMapBias, shadowMapTexelSize);
+	//return sampleShadowMapPCF(gShadowMap[i], uvCoords, z - shadowMapBias, shadowMapTexelSize);
 }
 
 float calcShadowFactorDirectional(vec4 lightSpacePos)
@@ -167,12 +172,14 @@ float calcShadowFactorDirectional(vec4 lightSpacePos)
 	if (!inRange(uvCoords.x) || !inRange(uvCoords.y) || !inRange(z))
 		return 1.0;
 	
-	return sampleShadowMapPCF(MAX_SPOT_LIGHTS, uvCoords, z - shadowMapBias, shadowMapTexelSize);
+	return sampleShadowMapPCF(directionalShadowMap, uvCoords, z - shadowMapBias, shadowMapTexelSize);
 }
 
 float calcShadowFactorCube(vec3 toFragVector, int i)
 {
-	float sampledDistance = texture(gShadowCubeMap[i], toFragVector).r;
+	//float sampledDistance = texture(gShadowCubeMap[i], toFragVector).r;
+	vec4 temp = texture(gShadowCubeMap[i], toFragVector);
+	float sampledDistance = temp.x;
 	float dist = length(toFragVector);
 	if (dist < sampledDistance + shadowMapBias)
 		return 1.0;
@@ -185,25 +192,31 @@ bool inRange(float val)
 	return val >= 0.0 && val <= 1.0;
 }
 
-float sampleShadowMap(int index, vec2 uv, float compare)
+float sampleShadowMap(sampler2D shadowMap, vec2 uv, float compare)
 {
-	float depth = texture(gShadowMap[index], uv).x;
+	gShadowMapUsed = true;
+	//float depth = texture(shadowMap, uv).x;
+	vec4 temp;
+	temp = texture(shadowMap, uv);
+	//temp.x = 1.0;
+	float depth = 0.0;
+	depth = temp.x;
 	if (depth < compare)
 		return 0.5;
 	else
 		return 1.0;
 }
 
-float sampleShadowMapLinear(int index, vec2 coords, float compare, vec2 texelSize)
+float sampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
 {
 	vec2 pixelPos = coords/texelSize + vec2(0.5);
 	vec2 fracPart = fract(pixelPos);
 	vec2 startTexel = (pixelPos - fracPart) * texelSize;
 	
-	float blTexel = sampleShadowMap(index, startTexel, compare);
-	float brTexel = sampleShadowMap(index, startTexel + vec2(texelSize.x, 0.0), compare);
-	float tlTexel = sampleShadowMap(index, startTexel + vec2(0.0, texelSize.y), compare);
-	float trTexel = sampleShadowMap(index, startTexel + texelSize, compare);
+	float blTexel = sampleShadowMap(shadowMap, startTexel, compare);
+	float brTexel = sampleShadowMap(shadowMap, startTexel + vec2(texelSize.x, 0.0), compare);
+	float tlTexel = sampleShadowMap(shadowMap, startTexel + vec2(0.0, texelSize.y), compare);
+	float trTexel = sampleShadowMap(shadowMap, startTexel + texelSize, compare);
 	
 	float mixA = mix(blTexel, tlTexel, fracPart.y);
 	float mixB = mix(brTexel, trTexel, fracPart.y);
@@ -211,7 +224,7 @@ float sampleShadowMapLinear(int index, vec2 coords, float compare, vec2 texelSiz
 	return mix(mixA, mixB, fracPart.x);
 }
 
-float sampleShadowMapPCF(int index, vec2 coords, float compare, vec2 texelSize)
+float sampleShadowMapPCF(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
 {
 	const float NUM_SAMPLES = 3.0f;
 	const float SAMPLES_START = (NUM_SAMPLES-1.0f)/2.0f;
@@ -223,7 +236,7 @@ float sampleShadowMapPCF(int index, vec2 coords, float compare, vec2 texelSize)
 		for(float x = -SAMPLES_START; x <= SAMPLES_START; x += 1.0f)
 		{
 			vec2 coordsOffset = vec2(x,y)*texelSize;
-			result += sampleShadowMapLinear(index, coords + coordsOffset, compare, texelSize);
+			result += sampleShadowMapLinear(shadowMap, coords + coordsOffset, compare, texelSize);
 		}
 	}
 	return result/NUM_SAMPLES_SQUARED;
