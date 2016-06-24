@@ -28,8 +28,8 @@ Window::Window(const std::string& name, int width, int height)
 	glViewport(0, 0, m_Width, m_Height);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	SDL_GL_SetSwapInterval(0);
 }
@@ -43,6 +43,11 @@ Window::~Window()
 void Window::swapBuffer()
 {
 	SDL_GL_SwapWindow(m_Window);
+}
+
+void Window::clearScreen()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Window::begin()

@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include <iostream>
+#include <vector>
 
 GLuint Shader::currentlyBoundID = 0;
 
@@ -114,7 +115,32 @@ void Shader::setup(const char* vs, const char* fs)
 		glAttachShader(m_ProgramID, fragmentShader);
 
 	glLinkProgram(m_ProgramID);
+	GLint result;
+	glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		GLint length;
+		glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &length);
+		std::vector<char> error(length);
+		glGetProgramInfoLog(m_ProgramID, length, &length, &error[0]);
+		std::cout << "Failed to link shaders!" << std::endl;
+		printf("%s\n", &error[0]);
+		assert(false);
+	}
+
 	glValidateProgram(m_ProgramID);
+	glGetProgramiv(m_ProgramID, GL_VALIDATE_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		GLint length;
+		glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &length);
+		std::vector<char> error(length);
+		glGetProgramInfoLog(m_ProgramID, length, &length, &error[0]);
+		std::cout << "Failed to link shaders!" << std::endl;
+		printf("%s\n", &error[0]);
+		assert(false);
+	}
+
 	glDeleteShader(vertexShader);
 	if (fs)
 		glDeleteShader(fragmentShader);
@@ -162,4 +188,11 @@ void Shader::setUniform3(const std::string& uniformName, const glm::vec3& values
 void Shader::setUniformMatrix4(const std::string& uniformName, const glm::mat4& values)
 {
 	glUniformMatrix4fv(lookup(uniformName), 1, GL_FALSE, &values[0][0]);
+}
+
+Shader* Shader::createWaterDefault()
+{
+	Shader* s = new Shader();
+	s->load("Shaders/Water.vert", "Shaders/Water.frag");
+	return s;
 }

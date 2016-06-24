@@ -1,3 +1,4 @@
+#if 0
 #include <iostream>
 #include "Window.h"
 #include "Shader.h"
@@ -21,6 +22,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <vector>
+
 
 ShadowMapFBO directionalLightFbo;
 std::vector<ShadowMapFBO*> spotLightFbos;
@@ -50,7 +52,7 @@ void DirectionalLightShadowMapPass();
 void PointLightShadowMapPass(int i);
 
 
-int main(int argc, char* argv[])
+int main2(int argc, char* argv[])
 {
 	float MAX_FPS = 120.0f;
 	int width = 1440, height = 810;
@@ -64,7 +66,7 @@ int main(int argc, char* argv[])
 	//ModelCache::loadModel("bunny", "Models/dragon.obj");
 	ModelCache::loadModel("sphere", "Models/sphere2.obj");
 	ModelCache::loadModel("stall", "Models/stall.obj");
-	ModelCache::loadModel("cube", "Models/cube5.obj");
+	ModelCache::loadModel("cube", "Models/cube.obj");
 	//TextureManager::loadTexture("face", "Textures/wtf face.png");
 	TextureManager::loadTexture("bricks", "Textures/bricks.png");
 	TextureManager::loadTexture("tiled", "Textures/tiled2.png");
@@ -84,11 +86,11 @@ int main(int argc, char* argv[])
 	const glm::vec3 spotPosition1(15, 10, 2);
 	const glm::vec3 spotPosition2(0, 15, 15);
 	//SpotLight* spot1 = new SpotLight(spotPosition1, 0xdeff4cff, -spotPosition1, 15.0f, 1.0f, 0.0f, 0.0001f);
-	SpotLight* spot2 = new SpotLight(glm::vec3(0, 10, -8), 0xff3d57ff, glm::vec3(1, -1.5, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
+	SpotLight* spot2 = new SpotLight(glm::vec3(0, 5, -8), 0xff3d57ff, glm::vec3(1, -0.5, 1), 30.0f, 1.0f, 0.0f, 0.0001f);
 	//SpotLight* spot3 = new SpotLight(glm::vec3(10, 5, 0), 0xffffffff, glm::vec3(-1, 0, 0), 20.0f, 1.0f, 0.0f, 0.0001f);
 	PointLight* point1 = new PointLight(glm::vec3(0, 8, 0), 0x415970ff, 1.0f, 0.0f, 0.0001f);
-	//spotLights.push_back(spot2);
-	//pointLights.push_back(point1);
+	spotLights.push_back(spot2);
+	pointLights.push_back(point1);
 
 	for (auto& it : spotLights)
 	{
@@ -104,7 +106,7 @@ int main(int argc, char* argv[])
 		pointLightFbos.push_back(pointLightFbo);
 	}
 
-	directionalLight = new DirectionalLight(glm::vec3(-1, -1, -1), 0xffffffff, 60.0f);
+	//directionalLight = new DirectionalLight(glm::vec3(-1, -1, -1), 0xffffffff, 60.0f);
 
 	if (directionalLight)
 		assert(directionalLightFbo.Init(CUBE_MAP_DIMENSIONS, CUBE_MAP_DIMENSIONS));
@@ -142,8 +144,8 @@ int main(int argc, char* argv[])
 	Transform* rotation = new Transform();
 	Transform* upTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* upTranslation2 = new Transform(translation(-7.5f, 8, 0));
-	Transform* cubeTranslation = new Transform(translation(5, 1.0f, -2));
-	Transform* cubeRotation = new Transform(glm::rotate(glm::radians<float>(-90.0f), glm::vec3(1, 0, 0)));
+	Transform* cubeTranslation = new Transform(translation(5, 0.0f, -2));
+	Transform* cubeRotation = new Transform(glm::rotate(glm::radians<float>(-0.0f), glm::vec3(1, 0, 0)));
 	Transform* secondFloorTranslation = new Transform(translation(50, 0, -20));
 	Transform* secondStallTranslation = new Transform(translation(0, -0.5, 5));
 	Transform* myRotation = new Transform();
@@ -453,3 +455,4 @@ void RenderPass()
 	passthroughShader.unbind();
 
 }
+#endif

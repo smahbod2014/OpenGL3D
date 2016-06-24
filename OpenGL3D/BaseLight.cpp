@@ -23,6 +23,6 @@ BaseLight::~BaseLight()
 
 void BaseLight::setUniforms(Shader& shader, const std::string& prefix)
 {
-	shader.setUniform1(prefix + ".isActive", (int)m_IsActive);
+	shader.setUniform1(prefix + ".isActive", (float)m_IsActive);
 	shader.setUniform3(prefix + ".color", m_Color);
 }

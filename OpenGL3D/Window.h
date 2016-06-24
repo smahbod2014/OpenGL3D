@@ -16,6 +16,7 @@ public:
 	void swapBuffer();
 	void end();
 	void calculateFPS();
+	void clearScreen();
 	
 	void setMaxFPS(float fps) { m_MaxFps = fps; }
 	bool shouldClose() const { return m_ShouldClose; }

@@ -8,7 +8,7 @@
 
 Camera::Camera()
 {
-	set(glm::vec3(0, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	set(glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 }
 
 Camera::Camera(const glm::vec3& position, const glm::vec3& lookAt, const glm::vec3& worldUp)

@@ -105,6 +105,9 @@
     <ClCompile Include="DirectionalLight.cpp">
       <Filter>Source Files\Lighting</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -181,6 +184,12 @@
     </ClInclude>
     <ClInclude Include="DirectionalLight.h">
       <Filter>Source Files\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers.h">
+      <Filter>Source Files\Managers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

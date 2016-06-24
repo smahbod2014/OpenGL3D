@@ -16,9 +16,14 @@ Geode::~Geode()
 
 }
 
+void Geode::draw()
+{
+	draw(glm::mat4(1.0f));
+}
+
 void Geode::draw(const glm::mat4& matrix)
 {
-	if (m_RenderPassIndex >= 0)
+	if (false && m_RenderPassIndex >= 0)
 	{
 		//do I need this??? doesn't look like it
 		//m_Renderer->m_Shader->bind();

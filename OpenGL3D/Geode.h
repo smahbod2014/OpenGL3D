@@ -13,6 +13,7 @@ public:
 	Geode(const std::string& alias, Renderer* renderer);
 	virtual ~Geode();
 
+	void draw();
 	void draw(const glm::mat4& matrix) override;
 
 	void setTextureID(GLuint texID) { m_TexID = texID; }
