@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Shader.h"
 #include "Constants.h"
+#include "Camera.h"
 
 Geode::Geode(const std::string& alias, Renderer* renderer)
 {
@@ -16,8 +17,9 @@ Geode::~Geode()
 
 }
 
-void Geode::draw()
+void Geode::draw(Camera* camera)
 {
+	cam = camera;
 	draw(glm::mat4(1.0f));
 }
 
@@ -41,5 +43,5 @@ void Geode::draw(const glm::mat4& matrix)
 		glBindTexture(GL_TEXTURE_2D, m_TexID);
 	}
 
-	m_Renderer->render(*m_Model);
+	m_Renderer->render(*m_Model, cam);
 }

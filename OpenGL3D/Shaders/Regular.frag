@@ -32,6 +32,8 @@ void main()
 		totalLighting += dLightContribution;
 	}
 	
+	totalLighting += vec3(0.2, 0.2, 0.2);
+	
 	finalColor = textureColor * clamp(vec4(totalLighting, 1.0), 0.0, 1.0);
 	//finalColor = vec4(1, 0, 0, 1);
 }

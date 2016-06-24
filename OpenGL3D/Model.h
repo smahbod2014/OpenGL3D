@@ -15,6 +15,8 @@ struct VertexData
 class Model
 {
 	friend class Renderer;
+	friend class SkyboxRenderer;
+	friend class TerrainRenderer;
 public:
 	Model();
 	~Model();
@@ -23,6 +25,7 @@ public:
 	void loadPlane(float size);
 	void loadArbitrary(float* verts, float* texCoords, float* normals, unsigned int* ind, int numVertices, int indexCount);
 	void generate(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices);
+	void generateVerticesOnly(float* vertices, int numVertices);
 	void loadFromFile(const std::string& filepath);
 	void bindTexture(int i);
 

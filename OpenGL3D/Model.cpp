@@ -188,6 +188,23 @@ void Model::generate(const std::vector<VertexData>& vertices, const std::vector<
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), indices.data(), GL_STATIC_DRAW);
 }
 
+void Model::generateVerticesOnly(float* vertices, int numVertices)
+{
+	glGenVertexArrays(1, &m_Vao);
+	glBindVertexArray(m_Vao);
+
+	glGenBuffers(1, &m_Vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
+
+	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float) * 3, vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const GLvoid*)0);
+
+	glDisableVertexAttribArray(0);
+}
+
 void Model::bindTexture(int i)
 {
 	glActiveTexture(GL_TEXTURE0 + i);

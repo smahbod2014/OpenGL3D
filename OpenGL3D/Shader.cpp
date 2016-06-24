@@ -190,9 +190,23 @@ void Shader::setUniformMatrix4(const std::string& uniformName, const glm::mat4& 
 	glUniformMatrix4fv(lookup(uniformName), 1, GL_FALSE, &values[0][0]);
 }
 
-Shader* Shader::createWaterDefault()
+Shader* Shader::createRegularDefault()
 {
 	Shader* s = new Shader();
-	s->load("Shaders/Water.vert", "Shaders/Water.frag");
+	s->load("Shaders/Regular.vert", "Shaders/Regular.frag");
+	return s;
+}
+
+Shader* Shader::createSkyboxDefault()
+{
+	Shader* s = new Shader();
+	s->load("Shaders/Skybox.vert", "Shaders/Skybox.frag");
+	return s;
+}
+
+Shader* Shader::createTerrainDefault()
+{
+	Shader* s = new Shader();
+	s->load("Shaders/Terrain.vert", "Shaders/Terrain.frag");
 	return s;
 }

@@ -4,17 +4,17 @@
 #include "Camera.h"
 #include "Constants.h"
 #include "Window.h"
+#include "Helpers.h"
 #include "DirectionalLight.h"
 #include <glm/gtx/transform.hpp>
 
 Renderer::Renderer()
 {
-	P = glm::perspective<float>(glm::radians<float>(60.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
-	setShader(Shader::createWaterDefault());
+	setShader(Shader::createRegularDefault());
 	m_Shader->bind();
 	m_Shader->setUniform1("sampler", TEXTURE_INDEX);
-	m_Shader->setUniformMatrix4("P", P);
-	setCamera(nullptr);
+	m_Shader->setUniformMatrix4("P", getDefaultProjectionMatrix());
+	m_Shader->unbind();
 }
 
 Renderer::~Renderer()
@@ -22,31 +22,11 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::setCamera(Camera* camera)
+void Renderer::render(const Model& model, Camera* camera)
 {
-	if (m_Camera)
-		delete m_Camera;
+	m_Shader->bind();
+	m_Shader->setUniformMatrix4("V", camera->getInverseViewMatrix());
 
-	if (camera == nullptr) {
-		m_Camera = new Camera(glm::vec3(0, 0, 10),
-							  glm::vec3(0, 0, 0),
-							  glm::vec3(0, 1, 0));
-		
-	}
-	else {
-		m_Camera = camera;
-	}
-
-	updateCamera();
-}
-
-void Renderer::updateCamera()
-{
-	m_Shader->setUniformMatrix4("V", m_Camera->getInverseViewMatrix());
-}
-
-void Renderer::render(const Model& model)
-{
 	glBindVertexArray(model.m_Vao);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -65,10 +45,13 @@ void Renderer::render(const Model& model)
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	m_Shader->unbind();
 }
 
 void Renderer::loadDirectionalLight(DirectionalLight* dLight)
 {
 	m_Shader->bind();
 	dLight->setUniforms(*m_Shader, "dLight");
+	m_Shader->unbind();
 }

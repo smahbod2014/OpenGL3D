@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "SkyboxRenderer.h"
 #include "Model.h"
 #include "Camera.h"
 #include "Input.h"
@@ -20,6 +21,8 @@
 #include "Switch.h"
 #include "GLMHelper.h"
 #include "Helpers.h"
+#include "Terrain.h"
+#include "TerrainRenderer.h"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>

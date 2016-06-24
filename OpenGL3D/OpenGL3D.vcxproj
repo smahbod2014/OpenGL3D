@@ -102,8 +102,11 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowBuffer.cpp" />
     <ClCompile Include="ShadowMapCube.cpp" />
+    <ClCompile Include="SkyboxRenderer.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Switch.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainRenderer.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VBOIndexer.cpp" />
@@ -131,8 +134,11 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowBuffer.h" />
     <ClInclude Include="ShadowMapCube.h" />
+    <ClInclude Include="SkyboxRenderer.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Switch.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainRenderer.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VBOIndexer.h" />
