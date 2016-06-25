@@ -71,3 +71,10 @@ void TerrainRenderer::loadDirectionalLight(DirectionalLight* dLight)
 	dLight->setUniforms(*shader, "dLight");
 	shader->unbind();
 }
+
+void TerrainRenderer::loadClipPlane(float x, float y, float z, float w)
+{
+	shader->bind();
+	shader->setUniform4("plane", glm::vec4(x, y, z, w));
+	shader->unbind();
+}

@@ -205,6 +205,23 @@ void Model::generateVerticesOnly(float* vertices, int numVertices)
 	glDisableVertexAttribArray(0);
 }
 
+void Model::generate2dVerticesOnly(float* vertices, int numVertices)
+{
+	glGenVertexArrays(1, &m_Vao);
+	glBindVertexArray(m_Vao);
+
+	glGenBuffers(1, &m_Vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
+
+	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float) * 2, vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const GLvoid*)0);
+
+	glDisableVertexAttribArray(0);
+}
+
 void Model::bindTexture(int i)
 {
 	glActiveTexture(GL_TEXTURE0 + i);

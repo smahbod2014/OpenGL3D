@@ -15,7 +15,7 @@ public:
 	void setCameraPosition(const Camera& mainCamera);
 
 	const glm::vec3& getDirection() const { return m_Direction; }
-	const glm::mat4& getViewMatrix() const { return m_Camera.getInverseViewMatrix(); }
+	//const glm::mat4& getViewMatrix() const { return m_Camera.getInverseViewMatrix(); }
 	const glm::mat4& getProjection() const { return m_Projection; }
 private:
 	glm::vec3 m_Direction;

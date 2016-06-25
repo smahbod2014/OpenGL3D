@@ -27,7 +27,7 @@ public:
 
 	const glm::vec3& getDirection() const { return m_Direction; }
 	const glm::mat4& getProjection() const { return m_Projection; }
-	const glm::mat4& getViewMatrix() const { return m_ShadowCamera.getInverseViewMatrix(); }
+	//const glm::mat4& getViewMatrix() const { return m_ShadowCamera.getInverseViewMatrix(); }
 	float getCutoff() const { return m_Cutoff; }
 protected:
 	glm::vec3 m_Direction;

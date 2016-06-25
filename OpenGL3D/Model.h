@@ -18,6 +18,7 @@ class Model
 	friend class SkyboxRenderer;
 	friend class TerrainRenderer;
 	friend class WaterRenderer;
+	friend class GUIRenderer;
 public:
 	Model();
 	~Model();
@@ -27,6 +28,7 @@ public:
 	void loadArbitrary(float* verts, float* texCoords, float* normals, unsigned int* ind, int numVertices, int indexCount);
 	void generate(const std::vector<VertexData>& vertices, const std::vector<unsigned int>& indices);
 	void generateVerticesOnly(float* vertices, int numVertices);
+	void generate2dVerticesOnly(float* vertices, int numVertices);
 	void loadFromFile(const std::string& filepath);
 	void bindTexture(int i);
 

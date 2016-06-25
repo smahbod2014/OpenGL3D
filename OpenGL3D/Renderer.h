@@ -19,6 +19,7 @@ public:
 	void setShader(Shader* shader) { m_Shader = shader; }
 	void setShadowShader(Shader* shader) { m_ShadowShader = shader; }
 	void loadDirectionalLight(DirectionalLight* dLight);
+	void loadClipPlane(float x, float y, float z, float w);
 private:
 	Shader* m_Shader = nullptr;
 	Shader* m_ShadowShader = nullptr;

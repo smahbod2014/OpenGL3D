@@ -8,7 +8,7 @@ SpotLight::SpotLight(const glm::vec3& position, const glm::vec3& color, const gl
 {
 	setDirection(direction);
 	setCutoff(cutoff);
-	m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
+	//m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
 	//m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
 	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), 1.0f, 0.1f, 1000.0f);
 }
@@ -18,7 +18,7 @@ SpotLight::SpotLight(const glm::vec3& position, unsigned int color, const glm::v
 {
 	setDirection(direction);
 	setCutoff(cutoff);
-	m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
+	//m_ShadowCamera.set(position, position + m_Direction, glm::vec3(0, 1, 0));
 	//m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
 	m_Projection = glm::perspective<float>(glm::radians<float>(m_Cutoff * 2.0f), 1.0f, 0.1f, 1000.0f);
 }
@@ -48,17 +48,17 @@ void SpotLight::setUniforms(Shader& shader, const std::string& prefix)
 void SpotLight::translate(const glm::vec3& amount)
 {
 	PointLight::translate(amount);
-	m_ShadowCamera.translate(amount);
+	//m_ShadowCamera.translate(amount);
 }
 
 void SpotLight::setPosition(const glm::vec3& position)
 {
 	PointLight::translate(position);
-	m_ShadowCamera.setPosition(position);
+	//m_ShadowCamera.setPosition(position);
 }
 
 void SpotLight::rotate(const glm::vec3& axis, float degrees)
 {
 	m_Direction = glm::normalize(glm::vec3(glm::rotate(glm::radians<float>(degrees), axis) * glm::vec4(m_Direction, 0.0)));
-	m_ShadowCamera.rotate(axis, degrees);
+	//m_ShadowCamera.rotate(axis, degrees);
 }

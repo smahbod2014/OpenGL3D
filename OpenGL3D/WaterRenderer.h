@@ -4,11 +4,12 @@ class Shader;
 class Model;
 class Camera;
 class WaterTile;
+class WaterFramebuffers;
 
 class WaterRenderer
 {
 public:
-	WaterRenderer();
+	WaterRenderer(WaterFramebuffers* waterfbos);
 	~WaterRenderer();
 
 	void render(WaterTile* water, Camera* camera);
@@ -16,5 +17,6 @@ public:
 private:
 	Shader* shader;
 	Model* quad;
+	WaterFramebuffers* waterfbos;
 };
 

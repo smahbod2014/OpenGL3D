@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include "Window.h"
+#include "Camera.h"
 
 inline void catchError(int tag)
 {
@@ -64,3 +65,19 @@ inline glm::mat4 createTransformation(float x, float y, float z, float ax, float
 
 	return T * R * S;
 }
+
+inline glm::mat4 createGUITransformation(const glm::vec2& position, const glm::vec2& scale)
+{
+	return createTransformation(position.x, position.y, 0, 0, 1, 0, 0, scale.x, scale.y, 1);
+}
+
+#ifndef USE_OLD_CAMERA
+inline glm::mat4 createViewMatrix(Camera* camera)
+{
+	glm::mat4 view;
+	view = glm::rotate(view, camera->getPitch(), glm::vec3(1, 0, 0));
+	view = glm::rotate(view, camera->getYaw(), glm::vec3(0, 1, 0));
+	view = glm::translate(view, -camera->getPosition());
+	return view;
+}
+#endif

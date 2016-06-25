@@ -2,10 +2,12 @@
 #include "Input.h"
 #include "Constants.h"
 #include "GLMHelper.h"
+#include "Helpers.h"
 #include <SDL/SDL_keycode.h>
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
+#ifdef USE_OLD_CAMERA
 Camera::Camera()
 {
 	set(glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
@@ -23,7 +25,7 @@ Camera::~Camera()
 
 void Camera::update()
 {
-	m_Forward = glm::normalize((m_Position - m_LookAt));
+	m_Forward = glm::normalize(m_Position - m_LookAt);
 	m_Right = glm::normalize(glm::cross(m_WorldUp, m_Forward));
 	m_Up = glm::cross(m_Forward, m_Right);
 
@@ -32,7 +34,8 @@ void Camera::update()
 							 glm::vec4(m_Forward, 0.0f),
 							 glm::vec4(m_Position, 1.0f));
 
-	m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
+	//m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
+	m_InverseViewMatrix = glm::lookAt(m_Position, m_LookAt, glm::vec3(0, 1, 0));
 
 	m_Forward *= -1.0f;
 }
@@ -62,6 +65,9 @@ void Camera::input(float dt)
 		rotate(m_Right, rotateAmount);
 	if (Input::isKeyDown(SDLK_DOWN))
 		rotate(m_Right, -rotateAmount);
+
+	if (Input::isKeyJustPressed(SDLK_SPACE))
+		std::cout << m_Up.y << std::endl;
 }
 
 void Camera::translate(const glm::vec3& amount)
@@ -79,6 +85,7 @@ void Camera::setPosition(const glm::vec3& position)
 void Camera::setPositionNoLook(const glm::vec3& position)
 {
 	m_Position = position;
+
 	update();
 }
 
@@ -109,3 +116,67 @@ std::ostream& operator<<(std::ostream& os, const Camera& camera)
 {
 	return os << "Camera position: " << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z;
 }
+
+void Camera::invertPitch()
+{
+	float distance = m_LookAt.y - getPosition().y;
+	m_LookAt.y -= distance * 2;
+	update();
+	
+	/*if (m_LookAt.y > getPosition().y) {
+		float angle = acosf(glm::dot(glm::vec3(0, 0, -1), m_Forward)) * 180 / M_PI;
+		rotate(m_Right, angle);
+	}
+	else {
+		float angle = acosf(glm::dot(glm::vec3(0, 0, -1), m_Forward)) * 180 / M_PI;
+		rotate(m_Right, -angle);
+	}*/
+}
+
+#else
+
+Camera::Camera() {}
+
+Camera::~Camera() {}
+
+void Camera::input(float dt)
+{
+	float moveAmount = CAMERA_SPEED * dt;
+	float rotateAmount = CAMERA_ROTATION * dt / 100.0f;
+
+	if (Input::isKeyDown(SDLK_w))
+		translate(glm::vec3(0, 0, -1) * moveAmount);
+	if (Input::isKeyDown(SDLK_s))
+		translate(glm::vec3(0, 0, 1) * moveAmount);
+	if (Input::isKeyDown(SDLK_a))
+		translate(glm::vec3(-1, 0, 0) * moveAmount);
+	if (Input::isKeyDown(SDLK_d))
+		translate(glm::vec3(1, 0, 0) * moveAmount);
+	if (Input::isKeyDown(SDLK_v))
+		translate(glm::vec3(0, 1, 0) * moveAmount);
+	if (Input::isKeyDown(SDLK_x))
+		translate(glm::vec3(0, -1, 0) * moveAmount);
+	if (Input::isKeyDown(SDLK_LEFT))
+		yaw -= rotateAmount;
+	if (Input::isKeyDown(SDLK_RIGHT))
+		yaw += rotateAmount;
+	if (Input::isKeyDown(SDLK_UP))
+		pitch -= rotateAmount;
+	if (Input::isKeyDown(SDLK_DOWN))
+		pitch += rotateAmount;
+
+	update();
+}
+
+void Camera::translate(const glm::vec3 amount)
+{
+	position += amount;
+	update();
+}
+
+void Camera::update()
+{
+	viewMatrix = createViewMatrix(this);
+}
+
+#endif

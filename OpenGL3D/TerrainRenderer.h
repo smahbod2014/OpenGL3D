@@ -13,6 +13,7 @@ public:
 
 	void render(Terrain* terrain, Camera* camera);
 	void loadDirectionalLight(DirectionalLight* dLight);
+	void loadClipPlane(float x, float y, float z, float w);
 private:
 	Shader* shader;
 };

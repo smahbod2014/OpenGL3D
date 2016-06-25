@@ -220,6 +220,5 @@ float Terrain::getHeightAtLocation(float worldX, float worldZ)
 			heights[gridX + 1][gridZ + 1], 1.0f), glm::vec3(0.0f,
 			heights[gridX][gridZ + 1], 1.0f), glm::vec2(xCoord, zCoord));
 	}
-	std::cout << "Answer: " << answer << std::endl;
 	return answer;
 }

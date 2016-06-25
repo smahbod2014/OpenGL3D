@@ -7,6 +7,7 @@ layout (location = 2) in vec3 normal;
 uniform mat4 M = mat4(1.0);
 uniform mat4 V;
 uniform mat4 P;
+uniform vec4 plane;
 
 out vec2 outTexCoord;
 out vec3 outNormal;
@@ -20,4 +21,6 @@ void main()
 	//todo: normal will not work for non-uniform scaling
 	outNormal = normalize((M * vec4(normal, 0.0)).xyz);
 	outWorldPosition = worldPosition.xyz;
+	
+	gl_ClipDistance[0] = dot(worldPosition, plane);
 }

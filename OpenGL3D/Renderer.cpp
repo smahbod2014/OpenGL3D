@@ -37,7 +37,11 @@ void Renderer::render(const Model& model, Camera* camera)
 	//glActiveTexture(TEXTURE_INDEX);
 	//glBindTexture(GL_TEXTURE_2D, model.m_TexID);
 
+	glDisable(GL_CULL_FACE);
+
 	glDrawElements(GL_TRIANGLES, model.m_NumIndices, GL_UNSIGNED_INT, 0);
+
+	glEnable(GL_CULL_FACE);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
@@ -53,5 +57,12 @@ void Renderer::loadDirectionalLight(DirectionalLight* dLight)
 {
 	m_Shader->bind();
 	dLight->setUniforms(*m_Shader, "dLight");
+	m_Shader->unbind();
+}
+
+void Renderer::loadClipPlane(float x, float y, float z, float w)
+{
+	m_Shader->bind();
+	m_Shader->setUniform4("plane", glm::vec4(x, y, z, w));
 	m_Shader->unbind();
 }
