@@ -11,7 +11,7 @@ uniform mat4 V;
 uniform mat4 P;
 uniform vec3 cameraPosition;
 
-const float tiling = 4.0;
+const float tiling = 2.0;
 
 void main()
 {

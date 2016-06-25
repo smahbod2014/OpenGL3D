@@ -37,14 +37,15 @@ public:
 		TextureManager::loadTexture("mud", "Textures/mud.png");
 		TextureManager::loadTexture("path", "Textures/path.png");
 		TextureManager::loadTexture("blendMap", "Textures/blendMap.png");
-		TextureManager::loadTexture("dudvMap", "Textures/waterDUDV.png");
+		TextureManager::loadTexture("dudvMap", "Textures/waterDUDV2.png");
+		TextureManager::loadTexture("normalMap", "Textures/matchingNormalMap.png");
 		TextureManager::loadCubeMap("clouds", "Skyboxes/Clouds");
 
 		camera = new Camera();
 		camera->translate(glm::vec3(0, 5, 0));
 		camera->rotate(glm::vec3(0, 1, 0), -45);
 		renderer = new Renderer();
-		dLight = new DirectionalLight(glm::vec3(1, -0.5, 0), glm::vec3(1, 1, 1), 100);
+		dLight = new DirectionalLight(glm::vec3(-1, -0.5, 0), glm::vec3(1, 1, 1), 100);
 		renderer->loadDirectionalLight(dLight);
 		renderer->loadClipPlane(0, -1, 0, 15);
 
@@ -91,8 +92,9 @@ public:
 		}
 
 		waterfbos = new WaterFramebuffers();
-		water = new WaterTile(30, -30, 6, 25, 0.03f, "dudvMap");
+		water = new WaterTile(30, -30, 6, 25, 0.06f, "dudvMap", "normalMap");
 		waterRenderer = new WaterRenderer(waterfbos);
+		waterRenderer->loadDirectionalLight(dLight);
 
 		//plane = new Geode("plane", renderer);
 		//plane->setTextureID(waterfbos->reflectionTexture);

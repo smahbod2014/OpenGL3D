@@ -5,6 +5,7 @@
 #include "Helpers.h"
 #include "WaterTile.h"
 #include "WaterFramebuffers.h"
+#include "DirectionalLight.h"
 
 WaterRenderer::WaterRenderer(WaterFramebuffers* waterfbos)
 {
@@ -16,6 +17,8 @@ WaterRenderer::WaterRenderer(WaterFramebuffers* waterfbos)
 	shader->setUniform1("reflectionTexture", 0);
 	shader->setUniform1("refractionTexture", 1);
 	shader->setUniform1("dudvMap", 2);
+	shader->setUniform1("normalMap", 3);
+	shader->setUniform1("depthMap", 4);
 	shader->unbind();
 
 	quad = new Model();
@@ -52,11 +55,27 @@ void WaterRenderer::render(WaterTile* water, Camera* camera)
 	glBindTexture(GL_TEXTURE_2D, waterfbos->refractionTexture);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, water->dudvID);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, water->normalMapID);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, waterfbos->refractionDepthTexture);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisable(GL_BLEND);
 
 	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
 
+	shader->unbind();
+}
+
+void WaterRenderer::loadDirectionalLight(DirectionalLight* dLight)
+{
+	shader->bind();
+	dLight->setUniforms(*shader, "dLight");
 	shader->unbind();
 }

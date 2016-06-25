@@ -5,6 +5,7 @@ class Model;
 class Camera;
 class WaterTile;
 class WaterFramebuffers;
+class DirectionalLight;
 
 class WaterRenderer
 {
@@ -13,6 +14,7 @@ public:
 	~WaterRenderer();
 
 	void render(WaterTile* water, Camera* camera);
+	void loadDirectionalLight(DirectionalLight* dLight);
 
 private:
 	Shader* shader;
