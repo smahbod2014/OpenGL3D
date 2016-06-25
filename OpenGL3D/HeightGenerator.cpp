@@ -7,7 +7,7 @@ HeightGenerator::HeightGenerator(float amplitude, int width)
 {
 	this->amplitude = amplitude;
 	this->width = width;
-	random = new Random(1);
+	random = new Random(3);
 }
 
 

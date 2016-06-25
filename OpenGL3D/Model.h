@@ -17,6 +17,7 @@ class Model
 	friend class Renderer;
 	friend class SkyboxRenderer;
 	friend class TerrainRenderer;
+	friend class WaterRenderer;
 public:
 	Model();
 	~Model();

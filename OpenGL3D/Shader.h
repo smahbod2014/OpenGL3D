@@ -24,6 +24,7 @@ public:
 	static Shader* createRegularDefault();
 	static Shader* createSkyboxDefault();
 	static Shader* createTerrainDefault();
+	static Shader* createWaterDefault();
 private:
 	static GLuint currentlyBoundID;
 

@@ -61,6 +61,7 @@ void Terrain::generateTerrain()
 		for (int j = 0; j<TERRAIN_VERTEX_COUNT; j++){
 			vertices[vertexPointer * 3] = (float)j / ((float)TERRAIN_VERTEX_COUNT - 1) * TERRAIN_SIZE;
 			heights[j][i] = vertices[vertexPointer * 3 + 1] = getHeight(j, i);
+			//if (heights[j][i] > -39) std::cout << heights[j][i] << std::endl;
 			vertices[vertexPointer * 3 + 2] = (float)i / ((float)TERRAIN_VERTEX_COUNT - 1) * TERRAIN_SIZE;
 			glm::vec3 normal = calculateNormal(j, i);
 			normals[vertexPointer * 3] = normal.x;
@@ -144,7 +145,7 @@ float Terrain::getHeight(int x, int z)
 	return height; ???*/
 	
 	if (x < 0 || x >= heightMap->width || z < 0 || z >= heightMap->height) {
-		std::cout << "x: " << x << ", z: " << z << std::endl;
+		//std::cout << "x: " << x << ", z: " << z << std::endl;
 		return 0.0f;
 	}
 
@@ -195,9 +196,12 @@ float Terrain::getHeightAtLocation(float worldX, float worldZ)
 	int gridX = (int)floorf(terrainX / gridSquareSize);
 	int gridZ = (int)floorf(terrainZ / gridSquareSize);
 
-	if (heightMap)
-		if (gridX >= heightMap->height - 1 || gridZ >= heightMap->height - 1 || gridX < 0 || gridZ < 0)
+	if (heightMap) {
+		if (gridX >= heightMap->height - 1 || gridZ >= heightMap->height - 1 || gridX < 0 || gridZ < 0) {
+			//std::cout << "Nope: " << answer << std::endl;
 			return 0;
+		}
+	}
 	else
 		if (gridX >= VERTEX_COUNT - 1 || gridZ >= VERTEX_COUNT - 1 || gridX < 0 || gridZ < 0)
 			return 0;
@@ -211,9 +215,11 @@ float Terrain::getHeightAtLocation(float worldX, float worldZ)
 			heights[gridX][gridZ + 1], 1), glm::vec2(xCoord, zCoord));
 	}
 	else {
-		answer = barryCentric(glm::vec3(1, heights[gridX + 1][gridZ], 0), glm::vec3(1,
-			heights[gridX + 1][gridZ + 1], 1), glm::vec3(0,
-			heights[gridX][gridZ + 1], 1), glm::vec2(xCoord, zCoord));
+		float s = heights[gridX][gridZ + 1];
+		answer = barryCentric(glm::vec3(1.0f, heights[gridX + 1][gridZ], 0), glm::vec3(1.0f,
+			heights[gridX + 1][gridZ + 1], 1.0f), glm::vec3(0.0f,
+			heights[gridX][gridZ + 1], 1.0f), glm::vec2(xCoord, zCoord));
 	}
+	std::cout << "Answer: " << answer << std::endl;
 	return answer;
 }

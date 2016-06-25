@@ -210,3 +210,10 @@ Shader* Shader::createTerrainDefault()
 	s->load("Shaders/Terrain.vert", "Shaders/Terrain.frag");
 	return s;
 }
+
+Shader* Shader::createWaterDefault()
+{
+	Shader* s = new Shader();
+	s->load("Shaders/Water.vert", "Shaders/Water.frag");
+	return s;
+}

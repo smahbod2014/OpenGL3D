@@ -4,6 +4,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include "Window.h"
 
@@ -48,4 +49,18 @@ inline float barryCentric(const glm::vec3& p1, const glm::vec3& p2, const glm::v
 	float l2 = ((p3.z - p1.z) * (pos.x - p3.x) + (p1.x - p3.x) * (pos.y - p3.z)) / det;
 	float l3 = 1.0f - l1 - l2;
 	return l1 * p1.y + l2 * p2.y + l3 * p3.y;
+}
+
+inline glm::mat4 createTransformation(float x, float y, float z, float ax, float ay, float az, float angle, float sx, float sy, float sz)
+{
+	glm::mat4 T;
+	T = glm::translate(T, glm::vec3(x, y, z));
+
+	glm::mat4 R;
+	R = glm::rotate(R, angle, glm::vec3(ax, ay, az));
+
+	glm::mat4 S;
+	S = glm::scale(S, glm::vec3(sx, sy, sz));
+
+	return T * R * S;
 }

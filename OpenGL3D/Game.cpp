@@ -1,4 +1,6 @@
 #include "OpenGL3D.h"
+#include "WaterTile.h"
+#include "WaterRenderer.h"
 
 class Game : public OpenGL3D
 {
@@ -7,10 +9,12 @@ private:
 	Renderer* renderer;
 	SkyboxRenderer* skyboxRenderer;
 	TerrainRenderer* terrainRenderer;
+	WaterRenderer* waterRenderer;
 	DirectionalLight* dLight;
 	Geode* tree;
 	std::vector<glm::mat4> transformations;
 	Terrain* terrain;
+	WaterTile* water;
 public:
 	Game(const std::string& name, int width, int height) :
 		OpenGL3D(name, width, height) {}
@@ -43,12 +47,12 @@ public:
 
 		terrainRenderer = new TerrainRenderer();
 		terrainRenderer->loadDirectionalLight(dLight);
-		terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap", "Textures/s2.png");
+		terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap", "Textures/s3.png");
 		//terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap");
 		tree = new Geode("tree", renderer);
 		tree->setTextureID(TextureManager::getTexture("pine"));
 
-		Random* random = new Random();
+		/*Random* random = new Random();
 		for (int i = 0; i < 600; i++) {
 			if (i % 20 == 0) {
 				float x = terrain->getX() + random->nextFloat() * TERRAIN_SIZE;// -TERRAIN_SIZE / 2.0f;
@@ -60,7 +64,26 @@ public:
 				m[3][2] = z;
 				transformations.push_back(m);
 			}
+		}*/
+
+		TextureData td("Textures/treemap.png");
+		for (int z = 0; z < td.height; z++) {
+			for (int x = 0; x < td.width; x++) {
+				if (td.getRed(x, z) == 0xff) {
+					float xx = terrain->getX() + (float)x / td.width * TERRAIN_SIZE;// -TERRAIN_SIZE / 2.0f;
+					float zz = terrain->getZ() + (float)z / td.height * TERRAIN_SIZE;// -TERRAIN_SIZE / 2.0f;
+					float yy = terrain->getHeightAtLocation(xx, zz) - 0.25f;
+					glm::mat4 m;
+					m[3][0] = xx;
+					m[3][1] = yy;
+					m[3][2] = zz;
+					transformations.push_back(m);
+				}
+			}
 		}
+
+		water = new WaterTile(30, -30, 6, 25);
+		waterRenderer = new WaterRenderer();
 	}
 
 	virtual void update(float dt)
@@ -80,6 +103,8 @@ public:
 		for (int i = 0; i < transformations.size(); i++) {
 			tree->draw(transformations[i], camera);
 		}
+
+		waterRenderer->render(water, camera);
 	}
 
 	virtual void finish()

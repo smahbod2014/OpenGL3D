@@ -27,7 +27,6 @@ TerrainRenderer::~TerrainRenderer()
 
 void TerrainRenderer::render(Terrain* terrain, Camera* camera)
 {
-#if 1
 	shader->bind();
 	shader->setUniformMatrix4("V", camera->getInverseViewMatrix());
 	glm::mat4 M;
@@ -64,7 +63,6 @@ void TerrainRenderer::render(Terrain* terrain, Camera* camera)
 	glBindVertexArray(0);
 
 	shader->unbind();
-#endif
 }
 
 void TerrainRenderer::loadDirectionalLight(DirectionalLight* dLight)

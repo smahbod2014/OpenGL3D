@@ -112,6 +112,8 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VBOIndexer.cpp" />
+    <ClCompile Include="WaterRenderer.cpp" />
+    <ClCompile Include="WaterTile.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -146,6 +148,8 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VBOIndexer.h" />
+    <ClInclude Include="WaterRenderer.h" />
+    <ClInclude Include="WaterTile.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -6,9 +6,9 @@
 #include "TextureManager.h"
 #include "HeightGenerator.h"
 
-#define TERRAIN_SIZE 500
+#define TERRAIN_SIZE 64
 #define TERRAIN_MAX_HEIGHT 40.0f
-#define VERTEX_COUNT 128
+#define VERTEX_COUNT 16
 #define MAX_PIXEL_COLOR 256 * 256 * 256
 
 class Model;
