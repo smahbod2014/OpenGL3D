@@ -15,6 +15,7 @@ public:
 	virtual ~Geode();
 
 	void draw(Camera* camera);
+	void draw(const glm::mat4& matrix, Camera* camera);
 	void draw(const glm::mat4& matrix) override;
 
 	void setTextureID(GLuint texID) { m_TexID = texID; }

@@ -25,6 +25,9 @@ void main()
 {
 	vec4 textureColor = texture(sampler, outTexCoord);
 	
+	if (textureColor.a < 0.5)
+		discard;
+	
 	vec3 totalLighting = vec3(0.0, 0.0, 0.0);
 	if (dLight.base.isActive == 1.0) {
 		float coeff = max(0.0, dot(-dLight.direction, outNormal));

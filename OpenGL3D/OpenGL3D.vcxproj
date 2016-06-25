@@ -90,6 +90,7 @@
     <ClCompile Include="Geode.cpp" />
     <ClCompile Include="GLMHelper.cpp" />
     <ClCompile Include="Group.cpp" />
+    <ClCompile Include="HeightGenerator.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -98,6 +99,7 @@
     <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="PicoPNG.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Random.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowBuffer.cpp" />
@@ -121,6 +123,7 @@
     <ClInclude Include="Geode.h" />
     <ClInclude Include="GLMHelper.h" />
     <ClInclude Include="Group.h" />
+    <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
@@ -130,6 +133,7 @@
     <ClInclude Include="OpenGL3D.h" />
     <ClInclude Include="PicoPNG.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowBuffer.h" />

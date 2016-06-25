@@ -23,6 +23,12 @@ void Geode::draw(Camera* camera)
 	draw(glm::mat4(1.0f));
 }
 
+void Geode::draw(const glm::mat4& matrix, Camera* camera)
+{
+	cam = camera;
+	draw(matrix);
+}
+
 void Geode::draw(const glm::mat4& matrix)
 {
 	if (false && m_RenderPassIndex >= 0)
