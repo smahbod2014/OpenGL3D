@@ -70,6 +70,19 @@ void Window::begin()
 		case SDL_KEYUP:
 			Input::releaseKey(event.key.keysym.sym);
 			break;
+		case SDL_MOUSEBUTTONDOWN:
+			Input::pressMouse(event.button.button);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			Input::releaseMouse(event.button.button);
+			break;
+		case SDL_MOUSEMOTION:
+			Input::setMousePosition(event.button.x, event.button.y);
+			Input::setMouseMotionDelta(event.motion.xrel, event.motion.yrel);
+			break;
+		case SDL_MOUSEWHEEL:
+			Input::scrollMouseWheel(event.wheel.x, event.wheel.y);
+			break;
 		}
 	}
 }

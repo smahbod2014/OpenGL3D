@@ -17,10 +17,10 @@ class Terrain
 {
 	friend class TerrainRenderer;
 public:
-	Terrain(int gridX, int gridZ, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias,
 			const std::string& heightMapPath);
-	Terrain(int gridX, int gridZ, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias);
 	~Terrain();
 

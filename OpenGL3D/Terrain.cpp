@@ -4,7 +4,7 @@
 #include "Helpers.h"
 #include <iostream>
 
-Terrain::Terrain(int gridX, int gridZ, const std::string& backAlias, const std::string& rTexAlias,
+Terrain::Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
 				 const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias,
 				 const std::string& heightMapPath)
 {
@@ -23,7 +23,7 @@ Terrain::Terrain(int gridX, int gridZ, const std::string& backAlias, const std::
 	generateTerrain();
 }
 
-Terrain::Terrain(int gridX, int gridZ, const std::string& backAlias, const std::string& rTexAlias,
+Terrain::Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
 				 const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias)
 {
 	backTex = TextureManager::getTexture(backAlias);

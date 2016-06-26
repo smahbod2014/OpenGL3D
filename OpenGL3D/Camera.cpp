@@ -66,8 +66,15 @@ void Camera::input(float dt)
 	if (Input::isKeyDown(SDLK_DOWN))
 		rotate(m_Right, -rotateAmount);
 
-	if (Input::isKeyJustPressed(SDLK_SPACE))
-		std::cout << m_Up.y << std::endl;
+	if (Input::getMouseWheelVertical() != 0) {
+		translate(m_Forward * (float)Input::getMouseWheelVertical() * 2.0f);
+	}
+
+	if (Input::isMouseDown(SDL_BUTTON_RIGHT)) {
+		glm::vec3 newPos = getPosition() + -m_Right * (float)Input::getDeltaX() * 10.0f * dt + m_Up * (float)Input::getDeltaY() * 10.0f * dt;
+		setPositionNoLook(newPos);
+		m_LookAt = glm::vec3(0, 0, 0);
+	}
 }
 
 void Camera::translate(const glm::vec3& amount)

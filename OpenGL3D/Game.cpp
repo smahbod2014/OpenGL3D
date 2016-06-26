@@ -56,7 +56,7 @@ public:
 
 		terrainRenderer = new TerrainRenderer();
 		terrainRenderer->loadDirectionalLight(dLight);
-		terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap", "Textures/s3.png");
+		terrain = new Terrain(-0.5f, -0.5f, "grass", "mud", "flowers", "path", "blendMap", "Textures/s3.png");
 		//terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap");
 		tree = new Geode("tree", renderer);
 		tree->setTextureID(TextureManager::getTexture("pine"));
@@ -92,7 +92,7 @@ public:
 		}
 
 		waterfbos = new WaterFramebuffers();
-		water = new WaterTile(30, -30, 6, 25, 0.06f, "dudvMap", "normalMap");
+		water = new WaterTile(terrain->getX() + 30, terrain->getZ() + 30, 6, 25, 0.06f, "dudvMap", "normalMap");
 		waterRenderer = new WaterRenderer(waterfbos);
 		waterRenderer->loadDirectionalLight(dLight);
 
@@ -100,8 +100,8 @@ public:
 		//plane->setTextureID(waterfbos->reflectionTexture);
 
 		guiRenderer = new GUIRenderer();
-		reflectionGUI = new GUITexture(waterfbos->reflectionTexture, glm::vec2(-0.75f, 0.75f), glm::vec2(0.25f, 0.25f));
-		refractionGUI = new GUITexture(waterfbos->refractionTexture, glm::vec2(0.75f, 0.75f), glm::vec2(0.25f, 0.25f));
+		reflectionGUI = new GUITexture(waterfbos->reflectionTexture, glm::vec2(-0.85f, 0.85f), glm::vec2(0.15f, 0.15f));
+		refractionGUI = new GUITexture(waterfbos->refractionTexture, glm::vec2(0.85f, 0.85f), glm::vec2(0.15f, 0.15f));
 		refractionDepthGUI = new GUITexture(waterfbos->refractionDepthTexture, glm::vec2(0.75f, 0.25f), glm::vec2(0.25f, 0.25f));
 	}
 
@@ -111,6 +111,16 @@ public:
 		water->update(dt);
 		catchError(1);
 		//std::cout << "hi" << std::endl;
+
+		if (Input::isMouseJustPressed(SDL_BUTTON_LEFT))
+			std::cout << "left clicked at (" << Input::getX() << ", " << Input::getY() << ")" << std::endl;
+		if (Input::isMouseDown(SDL_BUTTON_RIGHT))
+			std::cout << "right clicked" << std::endl;
+		if (Input::isMouseJustPressed(SDL_BUTTON_MIDDLE))
+			std::cout << "middle clicked" << std::endl;
+
+		//std::cout << "(" << Input::getDeltaX() << ", " << Input::getDeltaY() << ")" << std::endl;
+		std::cout << Input::getMouseWheelVertical() << std::endl;
 	}
 
 	virtual void render()

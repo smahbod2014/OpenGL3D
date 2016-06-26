@@ -27,7 +27,7 @@ uniform float moveFactor;
 uniform DirectionalLight dLight;
 
 const float waveStrength = 0.015;
-const float shineDampler = 20.0;
+const float shineDamper = 20.0;
 const float reflectivity = 0.6;
 
 void main()
@@ -77,7 +77,7 @@ void main()
 	if (dLight.base.isActive == 1.0) {
 		vec3 reflectedLight = reflect(normalize(dLight.direction), normal);
 		float specular = max(dot(reflectedLight, viewVector), 0.0);
-		specular = pow(specular, shineDampler);
+		specular = pow(specular, shineDamper);
 		specularHighlights = dLight.base.color * specular * reflectivity * clamp(waterDepth / 5.0, 0.0, 1.0);
 	}
 
