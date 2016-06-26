@@ -32,7 +32,7 @@ public:
 		ModelCache::loadPlane("plane", 25);
 		TextureManager::loadTexture("pine", "Textures/pine.png");
 		TextureManager::loadTexture("wtf", "Textures/wtf face.png");
-		TextureManager::loadTexture("grass", "Textures/grass.png");
+		TextureManager::loadTexture("grass", "Textures/tiled.png");
 		TextureManager::loadTexture("flowers", "Textures/grassFlowers.png");
 		TextureManager::loadTexture("mud", "Textures/mud.png");
 		TextureManager::loadTexture("path", "Textures/path.png");
@@ -49,14 +49,14 @@ public:
 		renderer->loadDirectionalLight(dLight);
 		renderer->loadClipPlane(0, -1, 0, 15);
 
-		skyboxRenderer = new SkyboxRenderer("clouds");
+		skyboxRenderer = new SkyboxRenderer("clouds", 500.0f, 1.0f);
 
 		
 		//cube->setTextureID(TextureManager::getTexture("pine"));
 
 		terrainRenderer = new TerrainRenderer();
 		terrainRenderer->loadDirectionalLight(dLight);
-		terrain = new Terrain(-0.5f, -0.5f, "grass", "mud", "flowers", "path", "blendMap", "Textures/s3.png");
+		terrain = new Terrain(-0.5f, -0.5f, 64.0f, "grass", "mud", "flowers", "path", "blendMap", "Textures/s3.png");
 		//terrain = new Terrain(0, -1, "grass", "mud", "flowers", "path", "blendMap");
 		tree = new Geode("tree", renderer);
 		tree->setTextureID(TextureManager::getTexture("pine"));
@@ -79,8 +79,8 @@ public:
 		for (int z = 0; z < td.height; z++) {
 			for (int x = 0; x < td.width; x++) {
 				if (td.getRed(x, z) == 0xff) {
-					float xx = terrain->getX() + (float)x / td.width * TERRAIN_SIZE;// -TERRAIN_SIZE / 2.0f;
-					float zz = terrain->getZ() + (float)z / td.height * TERRAIN_SIZE;// -TERRAIN_SIZE / 2.0f;
+					float xx = terrain->getX() + (float)x / td.width * terrain->getSize();// -TERRAIN_SIZE / 2.0f;
+					float zz = terrain->getZ() + (float)z / td.height * terrain->getSize();// -TERRAIN_SIZE / 2.0f;
 					float yy = terrain->getHeightAtLocation(xx, zz) - 0.25f;
 					glm::mat4 m;
 					m[3][0] = xx;
@@ -110,17 +110,6 @@ public:
 		camera->input(dt);
 		water->update(dt);
 		catchError(1);
-		//std::cout << "hi" << std::endl;
-
-		if (Input::isMouseJustPressed(SDL_BUTTON_LEFT))
-			std::cout << "left clicked at (" << Input::getX() << ", " << Input::getY() << ")" << std::endl;
-		if (Input::isMouseDown(SDL_BUTTON_RIGHT))
-			std::cout << "right clicked" << std::endl;
-		if (Input::isMouseJustPressed(SDL_BUTTON_MIDDLE))
-			std::cout << "middle clicked" << std::endl;
-
-		//std::cout << "(" << Input::getDeltaX() << ", " << Input::getDeltaY() << ")" << std::endl;
-		std::cout << Input::getMouseWheelVertical() << std::endl;
 	}
 
 	virtual void render()

@@ -4,8 +4,9 @@
 #include "Shader.h"
 #include "Helpers.h"
 #include "Camera.h"
+#include "Window.h"
 
-SkyboxRenderer::SkyboxRenderer(const std::string& alias, float size)
+SkyboxRenderer::SkyboxRenderer(const std::string& alias, float size, float rotationSpeed)
 {
 	cube = new Model();
 	
@@ -60,6 +61,9 @@ SkyboxRenderer::SkyboxRenderer(const std::string& alias, float size)
 	shader->setUniformMatrix4("P", getDefaultProjectionMatrix());
 	shader->setUniform1("cubeMap", 0);
 	shader->unbind();
+
+	this->rotationSpeed = rotationSpeed;
+	currentRotation = 0;
 }
 
 
@@ -74,6 +78,8 @@ void SkyboxRenderer::render(Camera* camera)
 	V[3][0] = 0.0f;
 	V[3][1] = 0.0f;
 	V[3][2] = 0.0f;
+	currentRotation += rotationSpeed * Window::getDelta() / 100.0f;
+	V = V * glm::rotate(currentRotation, glm::vec3(0.0f, 1.0f, 0.0f));
 	shader->setUniformMatrix4("V", V);
 	glBindVertexArray(cube->m_Vao);
 	glEnableVertexAttribArray(0);

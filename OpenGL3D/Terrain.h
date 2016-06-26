@@ -17,10 +17,10 @@ class Terrain
 {
 	friend class TerrainRenderer;
 public:
-	Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias,
 			const std::string& heightMapPath);
-	Terrain(float gridX, float gridZ, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias);
 	~Terrain();
 
@@ -30,6 +30,7 @@ public:
 	float getHeightAtLocation(float worldX, float worldZ);
 	float getX() { return x; }
 	float getZ() { return z; }
+	float getSize() { return size; }
 
 private:
 	float getHeight(int x, int z);
@@ -37,7 +38,7 @@ private:
 	glm::vec3 calculateNormal(int x, int z);
 	glm::vec3 calculateNormalProcedural(int x, int z);
 private:
-	float x, z;
+	float x, z, size;
 	float** heights;
 	Model* model;
 	GLuint backTex, rTex, gTex, bTex, blendMap;

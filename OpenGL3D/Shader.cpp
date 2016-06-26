@@ -154,7 +154,7 @@ GLint Shader::lookup(const std::string& uniformName)
 		//insert into cache
 		m_UniformCache[uniformName] = glGetUniformLocation(m_ProgramID, uniformName.c_str());
 
-		std::cout << "Caching (" << m_UniformCache[uniformName] << "): " << uniformName << std::endl;
+		//std::cout << "Caching (" << m_UniformCache[uniformName] << "): " << uniformName << std::endl;
 	}
 
 	return m_UniformCache[uniformName];

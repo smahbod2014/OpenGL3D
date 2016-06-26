@@ -3,6 +3,7 @@
 
 int Window::m_Width = 0;
 int Window::m_Height = 0;
+float Window::m_Delta = 0;
 glm::vec4 Window::m_ClearColor;
 
 Window::Window(const std::string& name, int width, int height)
@@ -12,6 +13,7 @@ Window::Window(const std::string& name, int width, int height)
 	m_Name = name;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
 	m_Window = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
@@ -34,6 +36,13 @@ Window::Window(const std::string& name, int width, int height)
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	SDL_GL_SetSwapInterval(0);
+
+	GLfloat max;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max);
+	std::cout << "Max anisotropy: " << max << std::endl;
+	
+	//enable multisample anti-aliasing
+	glEnable(GL_MULTISAMPLE);
 }
 
 Window::~Window()
