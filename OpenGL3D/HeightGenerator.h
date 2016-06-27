@@ -3,9 +3,8 @@
 #include <map>
 #include "Random.h"
 
-#define HEIGHT_SMOOTHING 4.0f
-#define OCTAVES 3
-#define ROUGHNESS 0.2f
+#define OCTAVES 4
+#define ROUGHNESS 0.4f
 
 class HeightGenerator
 {

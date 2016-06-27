@@ -7,14 +7,20 @@
 #include "Entity.h"
 #include "DirectionalLight.h"
 #include <glm/gtx/transform.hpp>
+#include <iostream>
+#include "Helpers.h"
 
 ShadowMapMasterRenderer::ShadowMapMasterRenderer(Camera* camera)
 {
 	shader = new Shader();
 	shader->load("Shaders/Shadow.vert", "Shaders/Shadow.frag");
+	shader->bind();
+	shader->setUniform1("modelTexture", 0);
+	shader->unbind();
 	shadowBox = new ShadowBox(&lightViewMatrix, camera);
 	shadowFbo = new ShadowMapFramebuffer(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	entityRenderer = new ShadowMapEntityRenderer(shader, &projectionViewMatrix);
+	offset = createOffset();
 }
 
 ShadowMapMasterRenderer::~ShadowMapMasterRenderer()
@@ -39,6 +45,8 @@ void ShadowMapMasterRenderer::prepare(const glm::vec3& lightDirection, ShadowBox
 {
 	updateOrthoProjectionMatrix(box->getWidth(), box->getHeight(), box->getLength());
 	updateLightViewMatrix(lightDirection, box->getCenter());
+	
+	//std::cout << box->getWidth() << std::endl;
 	projectionViewMatrix = projectionMatrix * lightViewMatrix;
 	shadowFbo->bindFramebuffer();
 	glEnable(GL_DEPTH_TEST);
@@ -55,11 +63,11 @@ void ShadowMapMasterRenderer::finish()
 void ShadowMapMasterRenderer::updateLightViewMatrix(const glm::vec3& lightDirection, const glm::vec3& center)
 {
 	lightViewMatrix = glm::mat4();
-	float pitch = acosf(glm::vec2(lightDirection.x, lightDirection.z).length());
+	float pitch = acosf(glm::length(glm::vec2(lightDirection.x, lightDirection.z)));
 	lightViewMatrix = glm::rotate(lightViewMatrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 	float yaw = glm::degrees((atanf(lightDirection.x / lightDirection.z)));
 	yaw = glm::radians(lightDirection.z > 0 ? yaw - 180 : yaw);
-	lightViewMatrix = glm::rotate(lightViewMatrix, -yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+	lightViewMatrix = glm::rotate(lightViewMatrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
 	lightViewMatrix = glm::translate(lightViewMatrix, -center);
 }
 
@@ -70,6 +78,12 @@ void ShadowMapMasterRenderer::updateOrthoProjectionMatrix(float width, float hei
 	projectionMatrix[1][1] = 2.0f / height;
 	projectionMatrix[2][2] = -2.0f / length;
 	projectionMatrix[3][3] = 1.0f;
+
+	static bool printed = false;
+	if (true || !printed) {
+		//printMatrix(projectionMatrix);
+		printed = true;
+	}
 }
 
 glm::mat4 ShadowMapMasterRenderer::createOffset()

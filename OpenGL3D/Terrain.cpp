@@ -4,7 +4,7 @@
 #include "Helpers.h"
 #include <iostream>
 
-Terrain::Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
+Terrain::Terrain(float gridX, float gridZ, float size, float maxHeight, const std::string& backAlias, const std::string& rTexAlias,
 				 const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias,
 				 const std::string& heightMapPath)
 {
@@ -15,6 +15,8 @@ Terrain::Terrain(float gridX, float gridZ, float size, const std::string& backAl
 	blendMap = TextureManager::getTexture(blendMapAlias);
 	heightMap = new TextureData(heightMapPath);
 	this->size = size;
+	this->maxHeight = maxHeight;
+	this->vertexCount = heightMap->height;
 	x = gridX * size;
 	z = gridZ * size;
 	model = new Model();
@@ -24,7 +26,7 @@ Terrain::Terrain(float gridX, float gridZ, float size, const std::string& backAl
 	generateTerrain();
 }
 
-Terrain::Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
+Terrain::Terrain(float gridX, float gridZ, float size, float maxHeight, int vertexCount, const std::string& backAlias, const std::string& rTexAlias,
 				 const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias)
 {
 	backTex = TextureManager::getTexture(backAlias);
@@ -32,14 +34,16 @@ Terrain::Terrain(float gridX, float gridZ, float size, const std::string& backAl
 	bTex = TextureManager::getTexture(gTexAlias);
 	gTex = TextureManager::getTexture(bTexAlias);
 	blendMap = TextureManager::getTexture(blendMapAlias);
-	heightGenerator = new HeightGenerator(30.0f, VERTEX_COUNT);
+	heightGenerator = new HeightGenerator(maxHeight, vertexCount);
 	this->size = size;
+	this->vertexCount = vertexCount;
+	this->maxHeight = maxHeight;
 	x = gridX * size;
 	z = gridZ * size;
 	model = new Model();
-	heights = new float*[VERTEX_COUNT];
-	for (int i = 0; i < VERTEX_COUNT; i++)
-		heights[i] = new float[VERTEX_COUNT];
+	heights = new float*[vertexCount];
+	for (int i = 0; i < vertexCount; i++)
+		heights[i] = new float[vertexCount];
 	generateTerrainProcedural();
 }
 
@@ -96,7 +100,7 @@ void Terrain::generateTerrain()
 void Terrain::generateTerrainProcedural()
 {
 	//learn this someday!
-	int TERRAIN_VERTEX_COUNT = VERTEX_COUNT;
+	int TERRAIN_VERTEX_COUNT = vertexCount;
 
 	int count = TERRAIN_VERTEX_COUNT * TERRAIN_VERTEX_COUNT;
 	int indexCount = 6 * (TERRAIN_VERTEX_COUNT - 1)*(TERRAIN_VERTEX_COUNT - 1);
@@ -154,7 +158,7 @@ float Terrain::getHeight(int x, int z)
 	float height = (float)heightMap->getRed(x, z);
 	height /= 128.0f;
 	height -= 1.0f;
-	height *= TERRAIN_MAX_HEIGHT;
+	height *= maxHeight;
 	return height;
 }
 
@@ -193,7 +197,7 @@ float Terrain::getHeightAtLocation(float worldX, float worldZ)
 	if (heightMap)
 		gridSquareSize = size / ((float)(heightMap->height - 1));
 	else
-		gridSquareSize = size / ((float)(VERTEX_COUNT - 1));
+		gridSquareSize = size / ((float)(vertexCount - 1));
 
 	int gridX = (int)floorf(terrainX / gridSquareSize);
 	int gridZ = (int)floorf(terrainZ / gridSquareSize);
@@ -205,7 +209,7 @@ float Terrain::getHeightAtLocation(float worldX, float worldZ)
 		}
 	}
 	else
-		if (gridX >= VERTEX_COUNT - 1 || gridZ >= VERTEX_COUNT - 1 || gridX < 0 || gridZ < 0)
+		if (gridX >= vertexCount - 1 || gridZ >= vertexCount - 1 || gridX < 0 || gridZ < 0)
 			return 0;
 
 	float xCoord = fmodf(terrainX, gridSquareSize) / gridSquareSize;

@@ -6,6 +6,8 @@
 #include "WaterTile.h"
 #include "WaterFramebuffers.h"
 #include "DirectionalLight.h"
+#include "ShadowBox.h"
+#include "ShadowMapMasterRenderer.h"
 
 WaterRenderer::WaterRenderer(WaterFramebuffers* waterfbos)
 {
@@ -77,5 +79,12 @@ void WaterRenderer::loadDirectionalLight(DirectionalLight* dLight)
 {
 	shader->bind();
 	dLight->setUniforms(*shader, "dLight");
+	shader->unbind();
+}
+
+void WaterRenderer::loadShadowSpaceMatrix(const glm::mat4& matrix)
+{
+	shader->bind();
+	shader->setUniformMatrix4("toShadowMapSpace", matrix);
 	shader->unbind();
 }

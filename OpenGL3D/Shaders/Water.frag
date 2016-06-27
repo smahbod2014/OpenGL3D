@@ -23,6 +23,7 @@ uniform sampler2D refractionTexture;
 uniform sampler2D dudvMap;
 uniform sampler2D normalMap;
 uniform sampler2D depthMap;
+uniform sampler2D shadowMap;
 uniform float moveFactor;
 uniform DirectionalLight dLight;
 
@@ -81,7 +82,11 @@ void main()
 		specularHighlights = dLight.base.color * specular * reflectivity * clamp(waterDepth / 5.0, 0.0, 1.0);
 	}
 
+	//murky water
+	vec4 murkyWaterColor = vec4(vec3(61, 107, 89) / 255.0, 1.0);
+	refractColor = mix(refractColor, murkyWaterColor, clamp(waterDepth/30.0, 0.0, 1.0));
+	
 	out_Color = mix(reflectColor, refractColor, refractiveFactor);
 	out_Color = mix(out_Color, vec4(0, 0.3, 0.5, 1), 0.2) + vec4(specularHighlights, 0.0);
-	out_Color.a = clamp(waterDepth / 0.5, 0.0, 1.0);
+	out_Color.a = clamp(waterDepth / 3.0, 0.0, 1.0);
 }

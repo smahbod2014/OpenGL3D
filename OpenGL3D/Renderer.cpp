@@ -14,6 +14,7 @@ Renderer::Renderer()
 	setShader(Shader::createRegularDefault());
 	m_Shader->bind();
 	m_Shader->setUniform1("sampler", 0);
+	//m_Shader->setUniform1("shadowMap", 1);
 	m_Shader->setUniformMatrix4("P", getDefaultProjectionMatrix());
 	m_Shader->unbind();
 }
@@ -59,6 +60,9 @@ void Renderer::render(std::vector<Entity*> entities, Camera* camera)
 	m_Shader->bind();
 	m_Shader->setUniformMatrix4("V", camera->getInverseViewMatrix());
 
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+
 	for (Entity* entity : entities) {
 		m_Shader->setUniformMatrix4("M", entity->getTransformation());
 		glBindVertexArray(entity->getModel()->m_Vao);
@@ -99,5 +103,12 @@ void Renderer::loadClipPlane(float x, float y, float z, float w)
 {
 	m_Shader->bind();
 	m_Shader->setUniform4("plane", glm::vec4(x, y, z, w));
+	m_Shader->unbind();
+}
+
+void Renderer::loadShadowSpaceMatrix(const glm::mat4& matrix)
+{
+	m_Shader->bind();
+	m_Shader->setUniformMatrix4("toShadowMapSpace", matrix);
 	m_Shader->unbind();
 }

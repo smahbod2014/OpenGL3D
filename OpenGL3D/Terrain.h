@@ -8,8 +8,7 @@
 
 #define TERRAIN_SIZE 64
 #define TERRAIN_MAX_HEIGHT 40.0f
-#define VERTEX_COUNT 16
-#define MAX_PIXEL_COLOR 256 * 256 * 256
+#define VERTEX_COUNT 96
 
 class Model;
 
@@ -17,10 +16,10 @@ class Terrain
 {
 	friend class TerrainRenderer;
 public:
-	Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, float size, float maxHeight, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias,
 			const std::string& heightMapPath);
-	Terrain(float gridX, float gridZ, float size, const std::string& backAlias, const std::string& rTexAlias,
+	Terrain(float gridX, float gridZ, float size, float maxHeight, int vertexCount, const std::string& backAlias, const std::string& rTexAlias,
 			const std::string& gTexAlias, const std::string& bTexAlias, const std::string& blendMapAlias);
 	~Terrain();
 
@@ -44,5 +43,7 @@ private:
 	GLuint backTex, rTex, gTex, bTex, blendMap;
 	TextureData* heightMap;
 	HeightGenerator* heightGenerator;
+	int vertexCount;
+	float maxHeight;
 };
 

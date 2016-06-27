@@ -29,12 +29,6 @@ void Camera::update()
 	m_Right = glm::normalize(glm::cross(m_WorldUp, m_Forward));
 	m_Up = glm::cross(m_Forward, m_Right);
 	m_Up = glm::normalize(m_Up);
-	if (m_Up.y < 0) {
-		//printVec(m_Up);
-		//m_Up = m_WorldUp;
-		//m_Up.y *= -1;
-		//m_Up.z *= -1;
-	}
 
 	m_ViewMatrix = glm::mat4(glm::vec4(m_Right, 0.0f),
 							 glm::vec4(m_Up, 0.0f),

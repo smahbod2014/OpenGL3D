@@ -9,7 +9,6 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Constants.h"
-#include "AltCamera.h"
 
 inline void catchError(int tag)
 {
@@ -88,6 +87,21 @@ inline void printVec(const glm::vec3& v)
 	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 }
 
+inline void printVec(const glm::vec4& v)
+{
+	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")" << std::endl;
+}
+
+inline void printMatrix(const glm::mat4& m)
+{
+	std::cout << "---------------------------------" << std::endl;
+	std::cout << "[ " << m[0][0] << "\t|\t" << m[1][0] << "\t|\t" << m[2][0] << "\t|\t" << m[3][0] << " ]" << std::endl;
+	std::cout << "[ " << m[0][1] << "\t|\t" << m[1][1] << "\t|\t" << m[2][1] << "\t|\t" << m[3][1] << " ]" << std::endl;
+	std::cout << "[ " << m[0][2] << "\t|\t" << m[1][2] << "\t|\t" << m[2][2] << "\t|\t" << m[3][2] << " ]" << std::endl;
+	std::cout << "[ " << m[0][3] << "\t|\t" << m[1][3] << "\t|\t" << m[2][3] << "\t|\t" << m[3][3] << " ]" << std::endl;
+	std::cout << "---------------------------------" << std::endl;
+}
+
 inline glm::mat4 blah(const glm::vec3& axis, float degrees)
 {
 	glm::mat4 mat;
@@ -119,17 +133,6 @@ inline glm::mat4 blah(const glm::vec3& axis, float degrees)
 
 
 inline glm::mat4 createViewMatrix(Camera* camera)
-{
-	glm::mat4 view;
-	view = glm::rotate(view, deg2rad(camera->getPitch()), glm::vec3(1, 0, 0));
-	view = glm::rotate(view, deg2rad(camera->getYaw()), glm::vec3(0, 1, 0));
-	//view = view * blah(glm::vec3(1.0f, 0.0f, 0.0f), camera->getPitch());
-	//view = view * blah(glm::vec3(0.0f, 1.0f, 0.0), camera->getYaw());
-	view = glm::translate(view, -camera->getPosition());
-	return view;
-}
-
-inline glm::mat4 createAltViewMatrix(AltCamera* camera)
 {
 	glm::mat4 view;
 	view = glm::rotate(view, deg2rad(camera->getPitch()), glm::vec3(1, 0, 0));

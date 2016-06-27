@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "Helpers.h"
 #include "Model.h"
+#include "ShadowBox.h"
+#include "ShadowMapMasterRenderer.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 TerrainRenderer::TerrainRenderer()
@@ -17,6 +19,11 @@ TerrainRenderer::TerrainRenderer()
 	shader->setUniform1("gTexture", 2);
 	shader->setUniform1("bTexture", 3);
 	shader->setUniform1("blendMap", 4);
+	shader->setUniform1("shadowMap", 5);
+	shader->setUniform1("shadowDistance", SHADOW_DISTANCE);
+	shader->setUniform1("shadowFadeInDistance", 10.0f);
+	shader->setUniform1("shadowMapSize", SHADOW_MAP_SIZE);
+	shader->setUniform1("pcfCount", PCF_COUNT);
 	shader->unbind();
 }
 
@@ -52,6 +59,8 @@ void TerrainRenderer::render(Terrain* terrain, Camera* camera)
 	glBindTexture(GL_TEXTURE_2D, terrain->gTex);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, terrain->blendMap);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 
 	glDrawElements(GL_TRIANGLES, terrain->model->m_NumIndices, GL_UNSIGNED_INT, 0);
 
@@ -76,5 +85,12 @@ void TerrainRenderer::loadClipPlane(float x, float y, float z, float w)
 {
 	shader->bind();
 	shader->setUniform4("plane", glm::vec4(x, y, z, w));
+	shader->unbind();
+}
+
+void TerrainRenderer::loadShadowSpaceMatrix(const glm::mat4& matrix)
+{
+	shader->bind();
+	shader->setUniformMatrix4("toShadowMapSpace", matrix);
 	shader->unbind();
 }

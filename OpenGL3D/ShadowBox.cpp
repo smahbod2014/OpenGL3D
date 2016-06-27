@@ -68,6 +68,7 @@ void ShadowBox::calculateWidthsAndHeights()
 {
 	farWidth = (float)(SHADOW_DISTANCE * tanf(deg2rad(FOV)));
 	nearWidth = (float)(NEAR_PLANE * tanf(deg2rad(FOV)));
+	std::cout << "Nearwidth is " << nearWidth << std::endl;
 	farHeight = farWidth / getAspectRatio();
 	nearHeight = nearWidth / getAspectRatio();
 }

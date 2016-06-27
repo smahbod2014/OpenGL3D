@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <GL/glew.h>
 
 class Model;
 class Shader;
@@ -21,9 +22,12 @@ public:
 	
 	void setShader(Shader* shader) { m_Shader = shader; }
 	void setShadowShader(Shader* shader) { m_ShadowShader = shader; }
+	void setShadowMapTextureID(GLuint id) { shadowMapTexture = id; }
 	void loadDirectionalLight(DirectionalLight* dLight);
 	void loadClipPlane(float x, float y, float z, float w);
+	void loadShadowSpaceMatrix(const glm::mat4& matrix);
 private:
 	Shader* m_Shader = nullptr;
 	Shader* m_ShadowShader = nullptr;
+	GLuint shadowMapTexture = 0;
 };

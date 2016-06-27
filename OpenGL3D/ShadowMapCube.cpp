@@ -90,15 +90,15 @@ bool ShadowMapCube::Init(unsigned int WindowWidth, unsigned int WindowHeight)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	Camera cameras[6];// =
-	/*{
+	Camera cameras[6] =
+	{
 		Camera(glm::vec3(0, 0, 0), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 		Camera(glm::vec3(0, 0, 0), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 		Camera(glm::vec3(0, 0, 0), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
 		Camera(glm::vec3(0, 0, 0), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
 		Camera(glm::vec3(0, 0, 0), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 		Camera(glm::vec3(0, 0, 0), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
-	};*/
+	};
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -130,6 +130,6 @@ void ShadowMapCube::BindForReading(int i)
 
 void ShadowMapCube::setLightPosition(const glm::vec3& position)
 {
-	//for (auto& it : m_Faces)
-		//it.camera.setPosition(position);
+	for (auto& it : m_Faces)
+		it.camera.setPosition(position);
 }

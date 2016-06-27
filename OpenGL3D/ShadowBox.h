@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#define OFFSET 10.0f
-#define SHADOW_DISTANCE 100.0f
+#define OFFSET 30.0f
+#define SHADOW_DISTANCE 150.0f
 #define UP glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 #define FORWARD glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)
 
@@ -30,10 +30,10 @@ public:
 	float getAspectRatio();
 
 private:
-	float minX, maxX;
-	float minY, maxY;
-	float minZ, maxZ;
-	float farHeight, farWidth, nearHeight, nearWidth;
+	float minX = 0.0f, maxX = 0.0f;
+	float minY = 0.0f, maxY = 0.0f;
+	float minZ = 0.0f, maxZ = 0.0f;
+	float farHeight = 0.0f, farWidth = 0.0f, nearHeight = 0.0f, nearWidth = 0.0f;
 	glm::mat4* lightViewMatrix;
 	Camera* camera;
 };

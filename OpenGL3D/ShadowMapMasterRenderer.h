@@ -4,7 +4,8 @@
 #include <GL/glew.h>
 #include <vector>
 
-#define SHADOW_MAP_SIZE 2048
+#define SHADOW_MAP_SIZE 8192
+#define PCF_COUNT 2
 
 class ShadowMapFramebuffer;
 class Shader;
