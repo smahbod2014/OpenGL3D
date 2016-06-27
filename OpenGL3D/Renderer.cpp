@@ -6,13 +6,14 @@
 #include "Window.h"
 #include "Helpers.h"
 #include "DirectionalLight.h"
+#include "Entity.h"
 #include <glm/gtx/transform.hpp>
 
 Renderer::Renderer()
 {
 	setShader(Shader::createRegularDefault());
 	m_Shader->bind();
-	m_Shader->setUniform1("sampler", TEXTURE_INDEX);
+	m_Shader->setUniform1("sampler", 0);
 	m_Shader->setUniformMatrix4("P", getDefaultProjectionMatrix());
 	m_Shader->unbind();
 }
@@ -49,6 +50,40 @@ void Renderer::render(const Model& model, Camera* camera)
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	m_Shader->unbind();
+}
+
+void Renderer::render(std::vector<Entity*> entities, Camera* camera)
+{
+	m_Shader->bind();
+	m_Shader->setUniformMatrix4("V", camera->getInverseViewMatrix());
+
+	for (Entity* entity : entities) {
+		m_Shader->setUniformMatrix4("M", entity->getTransformation());
+		glBindVertexArray(entity->getModel()->m_Vao);
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, entity->getModel()->m_Ibo);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, entity->getTexID());
+
+		glDisable(GL_CULL_FACE);
+
+		glDrawElements(GL_TRIANGLES, entity->getModel()->m_NumIndices, GL_UNSIGNED_INT, 0);
+
+		glEnable(GL_CULL_FACE);
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
 
 	m_Shader->unbind();
 }

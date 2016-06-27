@@ -82,10 +82,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AltCamera.cpp" />
     <ClCompile Include="BaseLight.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Camera2.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geode.cpp" />
@@ -104,8 +105,12 @@
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShadowBox.cpp" />
     <ClCompile Include="ShadowBuffer.cpp" />
     <ClCompile Include="ShadowMapCube.cpp" />
+    <ClCompile Include="ShadowMapEntityRenderer.cpp" />
+    <ClCompile Include="ShadowMapFramebuffer.cpp" />
+    <ClCompile Include="ShadowMapMasterRenderer.cpp" />
     <ClCompile Include="SkyboxRenderer.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Switch.cpp" />
@@ -120,11 +125,12 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AltCamera.h" />
     <ClInclude Include="BaseLight.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Camera2.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Geode.h" />
     <ClInclude Include="GLMHelper.h" />
@@ -143,8 +149,12 @@
     <ClInclude Include="Random.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShadowBox.h" />
     <ClInclude Include="ShadowBuffer.h" />
     <ClInclude Include="ShadowMapCube.h" />
+    <ClInclude Include="ShadowMapEntityRenderer.h" />
+    <ClInclude Include="ShadowMapFramebuffer.h" />
+    <ClInclude Include="ShadowMapMasterRenderer.h" />
     <ClInclude Include="SkyboxRenderer.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Switch.h" />

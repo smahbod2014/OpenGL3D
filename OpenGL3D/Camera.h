@@ -28,6 +28,8 @@ public:
 	const glm::vec3& getUp() const { return m_Up; }
 	const glm::vec3& getWorldUp() const { return m_WorldUp; }
 	const glm::vec3& getForward() const { return m_Forward; }
+	float getPitch();
+	float getYaw();
 
 	friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 private:
@@ -46,8 +48,8 @@ class Camera
 {
 public:
 	Camera();
-	//Camera(const glm::loo)
 	~Camera();
+	void lookAt(const glm::vec3& target);
 	void input(float dt);
 	void translate(const glm::vec3 amount);
 	void update();
@@ -61,5 +63,6 @@ private:
 	glm::mat4 viewMatrix;
 	glm::vec3 position;
 	float pitch, yaw, roll;
+	glm::vec3 forward, right, up;
 };
 #endif

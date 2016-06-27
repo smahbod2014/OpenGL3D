@@ -19,6 +19,7 @@ class Model
 	friend class TerrainRenderer;
 	friend class WaterRenderer;
 	friend class GUIRenderer;
+	friend class ShadowMapEntityRenderer;
 public:
 	Model();
 	~Model();

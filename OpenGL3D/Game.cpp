@@ -3,6 +3,8 @@
 #include "WaterRenderer.h"
 #include "WaterFramebuffers.h"
 #include "GUIRenderer.h"
+#include "Entity.h"
+#include "ShadowMapMasterRenderer.h"
 
 class Game : public OpenGL3D
 {
@@ -13,13 +15,15 @@ private:
 	TerrainRenderer* terrainRenderer;
 	WaterRenderer* waterRenderer;
 	GUIRenderer* guiRenderer;
+	ShadowMapMasterRenderer* shadowMapRenderer;
 	DirectionalLight* dLight;
 	Geode* tree, *plane;
 	std::vector<glm::mat4> transformations;
 	Terrain* terrain;
 	WaterTile* water;
 	WaterFramebuffers* waterfbos;
-	GUITexture* reflectionGUI, *refractionGUI, *refractionDepthGUI;
+	GUITexture* reflectionGUI, *refractionGUI, *shadowMapGUI;
+	std::vector<Entity*> entities;
 public:
 	Game(const std::string& name, int width, int height) :
 		OpenGL3D(name, width, height) {}
@@ -29,10 +33,8 @@ public:
 	virtual void init()
 	{
 		ModelCache::loadModel("tree", "Models/pine.obj");
-		ModelCache::loadPlane("plane", 25);
 		TextureManager::loadTexture("pine", "Textures/pine.png");
-		TextureManager::loadTexture("wtf", "Textures/wtf face.png");
-		TextureManager::loadTexture("grass", "Textures/tiled.png");
+		TextureManager::loadTexture("grass", "Textures/grass.png");
 		TextureManager::loadTexture("flowers", "Textures/grassFlowers.png");
 		TextureManager::loadTexture("mud", "Textures/mud.png");
 		TextureManager::loadTexture("path", "Textures/path.png");
@@ -42,8 +44,8 @@ public:
 		TextureManager::loadCubeMap("clouds", "Skyboxes/Clouds");
 
 		camera = new Camera();
-		camera->translate(glm::vec3(0, 5, 0));
-		camera->rotate(glm::vec3(0, 1, 0), -45);
+		//camera->translate(glm::vec3(0, 5, 0));
+		//camera->rotate(glm::vec3(0, 1, 0), -45);
 		renderer = new Renderer();
 		dLight = new DirectionalLight(glm::vec3(-1, -0.5, 0), glm::vec3(1, 1, 1), 100);
 		renderer->loadDirectionalLight(dLight);
@@ -87,6 +89,11 @@ public:
 					m[3][1] = yy;
 					m[3][2] = zz;
 					transformations.push_back(m);
+
+					
+					Entity* tree = new Entity("tree", "pine");
+					tree->translate(xx, yy, zz);
+					entities.push_back(tree);
 				}
 			}
 		}
@@ -99,10 +106,13 @@ public:
 		//plane = new Geode("plane", renderer);
 		//plane->setTextureID(waterfbos->reflectionTexture);
 
+		shadowMapRenderer = new ShadowMapMasterRenderer(camera);
+
 		guiRenderer = new GUIRenderer();
 		reflectionGUI = new GUITexture(waterfbos->reflectionTexture, glm::vec2(-0.85f, 0.85f), glm::vec2(0.15f, 0.15f));
 		refractionGUI = new GUITexture(waterfbos->refractionTexture, glm::vec2(0.85f, 0.85f), glm::vec2(0.15f, 0.15f));
-		refractionDepthGUI = new GUITexture(waterfbos->refractionDepthTexture, glm::vec2(0.75f, 0.25f), glm::vec2(0.25f, 0.25f));
+		shadowMapGUI = new GUITexture(shadowMapRenderer->getShadowMapTexture(), glm::vec2(0.85f, 0.55f), glm::vec2(0.15f, 0.15f));
+		std::cout << shadowMapRenderer->getShadowMapTexture() << std::endl;
 	}
 
 	virtual void update(float dt)
@@ -114,20 +124,18 @@ public:
 
 	virtual void render()
 	{
+		shadowMapRenderer->render(entities, dLight);
+		
 		//Reflection pass-------------------
 		waterfbos->bindReflectionFrameBuffer();
 		renderer->loadClipPlane(0, 1, 0, -water->height);
 		terrainRenderer->loadClipPlane(0, 1, 0, -water->height);
 		float distance = 2.0f * (camera->getPosition().y - water->height);
-		//camera->setPositionNoLook(camera->getPosition() - glm::vec3(0, distance, 0));
 		camera->translate(glm::vec3(0, -distance, 0));
 		camera->invertPitch();
 		terrainRenderer->render(terrain, camera);
 		skyboxRenderer->render(camera);
-		for (int i = 0; i < transformations.size(); i++) {
-			tree->draw(transformations[i], camera);
-		}
-		//camera->setPositionNoLook(camera->getPosition() + glm::vec3(0, distance, 0));
+		renderer->render(entities, camera);
 		camera->translate(glm::vec3(0, distance, 0));
 		camera->invertPitch();
 		
@@ -137,22 +145,17 @@ public:
 		terrainRenderer->loadClipPlane(0, -1, 0, water->height);
 		terrainRenderer->render(terrain, camera);
 		skyboxRenderer->render(camera);
-		for (int i = 0; i < transformations.size(); i++) {
-			tree->draw(transformations[i], camera);
-		}
+		renderer->render(entities, camera);
 
 		//Normal pass-----------------------
 		waterfbos->unbindCurrentFrameBuffer();
 		terrainRenderer->render(terrain, camera);
 		skyboxRenderer->render(camera);
-		for (int i = 0; i < transformations.size(); i++) {
-			tree->draw(transformations[i], camera);
-		}
+		renderer->render(entities, camera);
 		waterRenderer->render(water, camera);
-		//plane->draw(createTransformation(25, 10, -25, 0, 1, 0, 0, 1, 1, 1), camera);
 		guiRenderer->render(reflectionGUI);
 		guiRenderer->render(refractionGUI);
-		//guiRenderer->render(refractionDepthGUI);
+		guiRenderer->render(shadowMapGUI);
 	}
 
 	virtual void finish()

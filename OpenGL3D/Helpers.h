@@ -8,6 +8,8 @@
 #include <vector>
 #include "Window.h"
 #include "Camera.h"
+#include "Constants.h"
+#include "AltCamera.h"
 
 inline void catchError(int tag)
 {
@@ -40,7 +42,7 @@ inline std::vector<std::string> getAllFilesInFolder(std::string folder)
 
 inline glm::mat4 getDefaultProjectionMatrix()
 {
-	return glm::perspective<float>(glm::radians<float>(60.0f), (float)Window::getWidth() / (float)Window::getHeight(), 0.1f, 1000.0f);
+	return glm::perspective<float>(glm::radians<float>(FOV), (float)Window::getWidth() / (float)Window::getHeight(), NEAR_PLANE, FAR_PLANE);
 }
 
 inline float barryCentric(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec2& pos)
@@ -71,13 +73,69 @@ inline glm::mat4 createGUITransformation(const glm::vec2& position, const glm::v
 	return createTransformation(position.x, position.y, 0, 0, 1, 0, 0, scale.x, scale.y, 1);
 }
 
-#ifndef USE_OLD_CAMERA
+inline float deg2rad(float degrees)
+{
+	return degrees * M_PI / 180.0f;
+}
+
+inline float rad2deg(float radians)
+{
+	return radians * 180.0f / M_PI;
+}
+
+inline void printVec(const glm::vec3& v)
+{
+	std::cout << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+}
+
+inline glm::mat4 blah(const glm::vec3& axis, float degrees)
+{
+	glm::mat4 mat;
+
+	float r = deg2rad(degrees);
+	float c = cosf(r);
+	float s = sinf(r);
+	float omc = 1.0f - c;
+
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+
+	float* p = &mat[0][0];
+	p[0 + 0 * 4] = x * omc + c;
+	p[1 + 0 * 4] = y * x * omc + z * s;
+	p[2 + 0 * 4] = x * z * omc - y * s;
+	
+	p[0 + 1 * 4] = x * y * omc - z * s;
+	p[1 + 1 * 4] = y * omc + c;
+	p[2 + 1 * 4] = y * z * omc + x * s;
+	
+	p[0 + 2 * 4] = x * z * omc + y * s;
+	p[1 + 2 * 4] = y * z * omc - x * s;
+	p[2 + 2 * 4] = z * omc + c;
+
+	return mat;
+}
+
+
 inline glm::mat4 createViewMatrix(Camera* camera)
 {
 	glm::mat4 view;
-	view = glm::rotate(view, camera->getPitch(), glm::vec3(1, 0, 0));
-	view = glm::rotate(view, camera->getYaw(), glm::vec3(0, 1, 0));
+	view = glm::rotate(view, deg2rad(camera->getPitch()), glm::vec3(1, 0, 0));
+	view = glm::rotate(view, deg2rad(camera->getYaw()), glm::vec3(0, 1, 0));
+	//view = view * blah(glm::vec3(1.0f, 0.0f, 0.0f), camera->getPitch());
+	//view = view * blah(glm::vec3(0.0f, 1.0f, 0.0), camera->getYaw());
 	view = glm::translate(view, -camera->getPosition());
 	return view;
 }
-#endif
+
+inline glm::mat4 createAltViewMatrix(AltCamera* camera)
+{
+	glm::mat4 view;
+	view = glm::rotate(view, deg2rad(camera->getPitch()), glm::vec3(1, 0, 0));
+	view = glm::rotate(view, deg2rad(camera->getYaw()), glm::vec3(0, 1, 0));
+	//view = view * blah(glm::vec3(1.0f, 0.0f, 0.0f), camera->getPitch());
+	//view = view * blah(glm::vec3(0.0f, 1.0f, 0.0), camera->getYaw());
+	view = glm::translate(view, -camera->getPosition());
+	return view;
+}

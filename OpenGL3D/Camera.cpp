@@ -28,6 +28,13 @@ void Camera::update()
 	m_Forward = glm::normalize(m_Position - m_LookAt);
 	m_Right = glm::normalize(glm::cross(m_WorldUp, m_Forward));
 	m_Up = glm::cross(m_Forward, m_Right);
+	m_Up = glm::normalize(m_Up);
+	if (m_Up.y < 0) {
+		//printVec(m_Up);
+		//m_Up = m_WorldUp;
+		//m_Up.y *= -1;
+		//m_Up.z *= -1;
+	}
 
 	m_ViewMatrix = glm::mat4(glm::vec4(m_Right, 0.0f),
 							 glm::vec4(m_Up, 0.0f),
@@ -36,6 +43,7 @@ void Camera::update()
 
 	//m_InverseViewMatrix = glm::inverse(m_ViewMatrix);
 	m_InverseViewMatrix = glm::lookAt(m_Position, m_LookAt, glm::vec3(0, 1, 0));
+	//m_InverseViewMatrix = createViewMatrix(this);
 
 	m_Forward *= -1.0f;
 }
@@ -75,6 +83,83 @@ void Camera::input(float dt)
 		setPositionNoLook(newPos);
 		m_LookAt = glm::vec3(0, 0, 0);
 	}
+
+	if (Input::isKeyJustPressed(SDLK_q)) {
+		//pitch	
+		printVec(-m_Forward);
+	}
+
+	if (Input::isKeyJustPressed(SDLK_e)) {
+		//pitch	
+		printVec(m_Right);
+	}
+
+	if (Input::isKeyJustPressed(SDLK_t)) {
+		printVec(m_WorldUp);
+	}
+
+	if (Input::isKeyJustPressed(SDLK_f)) {
+		printVec(m_Up);
+	}
+
+	if (Input::isKeyJustPressed(SDLK_r)) {
+		float distance = 2.0f * (getPosition().y - 6);
+		translate(glm::vec3(0, -distance, 0));
+		invertPitch();
+		std::cout << "-----------------" << std::endl;
+		printVec(-m_Forward);
+		printVec(m_Right);
+		printVec(m_Up);
+		//std::cout << *this << std::endl;
+		std::cout << "-----------------" << std::endl;
+		invertPitch();
+		translate(glm::vec3(0, distance, 0));
+	}
+}
+
+float Camera::getPitch()
+{
+	/*float numerator = glm::dot(m_Forward, glm::vec3(0, 1, 0));
+	float denom1 = glm::length(glm::vec3(0, 1, 0));
+	float denom2 = glm::length(m_Forward);
+	float pitch = asinf(numerator / (denom1 * denom2));
+	return rad2deg(pitch);*/
+	float distance = m_LookAt.y - getPosition().y;
+	glm::vec3 flatLookAt = m_LookAt;
+	flatLookAt.y -= distance;
+	glm::vec3 fakeForward = glm::normalize(m_Position - flatLookAt);
+	float angle = acosf(glm::dot(-fakeForward, m_Forward));
+	if (m_LookAt.y < m_Position.y)
+		angle *= -1;
+	return rad2deg(angle);
+}
+
+float Camera::getYaw()
+{
+	/*float numerator = glm::dot(m_Forward, glm::vec3(1, 0, 0));
+	float denom1 = glm::length(glm::vec3(1, 0, 0));
+	float denom2 = glm::length(m_Forward);
+	float yaw = asinf(numerator / (denom1 * denom2));
+	return rad2deg(yaw);*/
+
+	/*glm::vec3 forward = m_Forward;
+	forward.y = 0;
+	forward = glm::normalize(forward);
+	printVec(forward);
+	float yaw = acosf(glm::dot(forward, glm::vec3(0, 0, -1)));
+	yaw = rad2deg(yaw);
+	if (forward.x < 0)
+		yaw = 360 - yaw;
+	return yaw;*/
+
+	float distance = m_LookAt.x - getPosition().x;
+	glm::vec3 flatLookAt = m_LookAt;
+	flatLookAt.x -= distance;
+	glm::vec3 fakeForward = glm::normalize(m_Position - flatLookAt);
+	float angle = acosf(glm::dot(-fakeForward, m_Forward));
+	if (m_LookAt.x < m_Position.x)
+		angle *= -1;
+	return rad2deg(angle);
 }
 
 void Camera::translate(const glm::vec3& amount)
@@ -142,27 +227,23 @@ void Camera::invertPitch()
 
 #else
 
-Camera::Camera() {}
+Camera::Camera()
+{
+	yaw = pitch = roll = 0;
+}
 
 Camera::~Camera() {}
+
+void Camera::lookAt(const glm::vec3& target)
+{
+	//viewMatrix = glm::lookAt(position, target, glm::vec3(0.0f, 1.0f, 0.0f));
+}
 
 void Camera::input(float dt)
 {
 	float moveAmount = CAMERA_SPEED * dt;
-	float rotateAmount = CAMERA_ROTATION * dt / 100.0f;
+	float rotateAmount = CAMERA_ROTATION * dt / 1.0f;
 
-	if (Input::isKeyDown(SDLK_w))
-		translate(glm::vec3(0, 0, -1) * moveAmount);
-	if (Input::isKeyDown(SDLK_s))
-		translate(glm::vec3(0, 0, 1) * moveAmount);
-	if (Input::isKeyDown(SDLK_a))
-		translate(glm::vec3(-1, 0, 0) * moveAmount);
-	if (Input::isKeyDown(SDLK_d))
-		translate(glm::vec3(1, 0, 0) * moveAmount);
-	if (Input::isKeyDown(SDLK_v))
-		translate(glm::vec3(0, 1, 0) * moveAmount);
-	if (Input::isKeyDown(SDLK_x))
-		translate(glm::vec3(0, -1, 0) * moveAmount);
 	if (Input::isKeyDown(SDLK_LEFT))
 		yaw -= rotateAmount;
 	if (Input::isKeyDown(SDLK_RIGHT))
@@ -171,6 +252,28 @@ void Camera::input(float dt)
 		pitch -= rotateAmount;
 	if (Input::isKeyDown(SDLK_DOWN))
 		pitch += rotateAmount;
+	if (Input::isKeyDown(SDLK_w))
+		translate(-forward * moveAmount);
+	if (Input::isKeyDown(SDLK_s))
+		translate(forward * moveAmount);
+	if (Input::isKeyDown(SDLK_a))
+		translate(-right * moveAmount);
+	if (Input::isKeyDown(SDLK_d))
+		translate(right * moveAmount);
+	if (Input::isKeyDown(SDLK_v))
+		translate(up * moveAmount);
+	if (Input::isKeyDown(SDLK_x))
+		translate(-up * moveAmount);
+	
+
+	if (Input::isKeyJustPressed(SDLK_q))
+		printVec(forward);
+	if (Input::isKeyJustPressed(SDLK_e))
+		printVec(right);
+	if (Input::isKeyJustPressed(SDLK_r))
+		printVec(up);
+
+	//std::cout << yaw << std::endl;
 
 	update();
 }
@@ -184,6 +287,46 @@ void Camera::translate(const glm::vec3 amount)
 void Camera::update()
 {
 	viewMatrix = createViewMatrix(this);
+
+	float sx, sy, sz, cx, cy, cz, theta;
+
+	// rotation angle about X-axis (pitch)
+	theta = deg2rad(pitch);
+	sx = sinf(theta);
+	cx = cosf(theta);
+
+	// rotation angle about Y-axis (yaw)
+	theta = deg2rad(yaw);
+	sy = sinf(theta);
+	cy = cosf(theta);
+
+	// rotation angle about Z-axis (roll)
+	theta = deg2rad(roll);
+	sz = sinf(theta);
+	cz = cosf(theta);
+
+	// determine left axis
+	right.x = cy*cz;
+	right.y = sx*sy*cz + cx*sz;
+	right.z = -cx*sy*cz + sx*sz;
+
+	right.z *= -1;
+	//right.y *= -1;
+
+	// determine up axis
+	up.x = -cy*sz;
+	up.y = -sx*sy*sz + cx*cz;
+	up.z = cx*sy*sz + sx*cz;
+
+	up.z *= -1;
+
+	// determine forward axis
+	forward.x = sy;
+	forward.y = -sx*cy;
+	forward.z = cx*cy;
+
+	forward.x *= -1;
+	forward.y *= -1;
 }
 
 #endif
