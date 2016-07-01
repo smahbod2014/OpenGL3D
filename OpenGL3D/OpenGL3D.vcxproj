@@ -84,8 +84,10 @@
   <ItemGroup>
     <ClCompile Include="BaseLight.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ContrastChanger.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Fbo.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geode.cpp" />
@@ -93,6 +95,8 @@
     <ClCompile Include="Group.cpp" />
     <ClCompile Include="GUIRenderer.cpp" />
     <ClCompile Include="HeightGenerator.cpp" />
+    <ClCompile Include="HorizontalBlur.cpp" />
+    <ClCompile Include="ImageRenderer.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -101,6 +105,7 @@
     <ClCompile Include="OBJLoader.cpp" />
     <ClCompile Include="PicoPNG.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="PostProcessing.cpp" />
     <ClCompile Include="Random.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -118,6 +123,7 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VBOIndexer.cpp" />
+    <ClCompile Include="VerticalBlur.cpp" />
     <ClCompile Include="WaterFramebuffers.cpp" />
     <ClCompile Include="WaterRenderer.cpp" />
     <ClCompile Include="WaterTile.cpp" />
@@ -127,8 +133,10 @@
     <ClInclude Include="BaseLight.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="ContrastChanger.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="Fbo.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Geode.h" />
     <ClInclude Include="GLMHelper.h" />
@@ -136,6 +144,8 @@
     <ClInclude Include="GUIRenderer.h" />
     <ClInclude Include="HeightGenerator.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="HorizontalBlur.h" />
+    <ClInclude Include="ImageRenderer.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelCache.h" />
@@ -144,6 +154,7 @@
     <ClInclude Include="OpenGL3D.h" />
     <ClInclude Include="PicoPNG.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="PostProcessing.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
@@ -161,6 +172,7 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VBOIndexer.h" />
+    <ClInclude Include="VerticalBlur.h" />
     <ClInclude Include="WaterFramebuffers.h" />
     <ClInclude Include="WaterRenderer.h" />
     <ClInclude Include="WaterTile.h" />

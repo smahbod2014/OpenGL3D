@@ -5,6 +5,8 @@
 #include "GUIRenderer.h"
 #include "Entity.h"
 #include "ShadowMapMasterRenderer.h"
+#include "Fbo.h"
+#include "PostProcessing.h"
 
 class Game : public OpenGL3D
 {
@@ -24,6 +26,7 @@ private:
 	WaterFramebuffers* waterfbos;
 	GUITexture* reflectionGUI, *refractionGUI, *shadowMapGUI;
 	std::vector<Entity*> entities;
+	Fbo* fbo;
 public:
 	Game(const std::string& name, int width, int height) :
 		OpenGL3D(name, width, height) {}
@@ -122,6 +125,8 @@ public:
 		refractionGUI = new GUITexture(waterfbos->refractionTexture, glm::vec2(0.85f, 0.85f), glm::vec2(0.15f, 0.15f));
 		//shadowMapGUI = new GUITexture(shadowMapRenderer->getShadowMapTexture(), glm::vec2(0.85f, 0.55f), glm::vec2(0.15f, 0.15f));
 		shadowMapGUI = new GUITexture(shadowMapRenderer->getShadowMapTexture(), glm::vec2(-0.85f, -0.85f), glm::vec2(0.15f, 0.15f));
+
+		fbo = new Fbo(Window::getWidth(), Window::getHeight(), DepthBufferType::DEPTH_RENDER_BUFFER);
 	}
 
 	virtual void update(float dt)
@@ -157,13 +162,16 @@ public:
 		terrainRenderer->render(terrain, camera);
 		skyboxRenderer->render(camera);
 		renderer->render(entities, camera);
+		waterfbos->unbindCurrentFrameBuffer();
 
 		//Normal pass-----------------------
-		waterfbos->unbindCurrentFrameBuffer();
+		fbo->bindFramebuffer();
 		terrainRenderer->render(terrain, camera);
 		skyboxRenderer->render(camera);
 		renderer->render(entities, camera);
 		waterRenderer->render(water, camera);
+		fbo->unbindFramebuffer();
+		PostProcessing::doPostProcessing(fbo->getColorTexture());
 		//guiRenderer->render(reflectionGUI);
 		//guiRenderer->render(refractionGUI);
 		//guiRenderer->render(shadowMapGUI);

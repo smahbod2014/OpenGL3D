@@ -34,6 +34,9 @@ public:
 	void bindTexture(int i);
 
 	void setTextureID(GLuint texID) { m_TexID = texID; }
+
+	GLuint getVao() { return m_Vao; }
+	GLuint getIbo() { return m_Ibo; }
 private:
 	int m_NumIndices;
 	GLuint m_Vao;
