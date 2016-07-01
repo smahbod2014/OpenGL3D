@@ -1,6 +1,14 @@
 #include "Fbo.h"
 #include "Window.h"
 
+Fbo::Fbo(int width, int height, int samples)
+{
+	this->width = width;
+	this->height = height;
+	this->samples = samples;
+	initialize(DepthBufferType::DEPTH_RENDER_BUFFER);
+}
+
 Fbo::Fbo(int width, int height, DepthBufferType type)
 {
 	this->width = width;
@@ -39,7 +47,11 @@ void Fbo::bindForReading()
 void Fbo::initialize(DepthBufferType type)
 {
 	createFramebuffer();
-	createTextureAttachment();
+	if (samples > 0)
+		createMultisampleColorAttachment();
+	else
+		createTextureAttachment();
+
 	if (type == DepthBufferType::DEPTH_RENDER_BUFFER)
 		createDepthBufferAttachment();
 	else if (type == DepthBufferType::DEPTH_TEXTURE)
@@ -81,6 +93,34 @@ void Fbo::createDepthBufferAttachment()
 {
 	glGenRenderbuffers(1, &depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+	if (samples > 0)
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, width, height);
+	else
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+}
+
+void Fbo::createMultisampleColorAttachment()
+{
+	glGenRenderbuffers(1, &colorBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffer);
+}
+
+void Fbo::resolveToFbo(Fbo* outputFbo)
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outputFbo->frameBuffer);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->frameBuffer);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, outputFbo->width, outputFbo->height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	unbindFramebuffer();
+}
+
+void Fbo::resolveToScreen()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->frameBuffer);
+	glDrawBuffer(GL_BACK);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, Window::getWidth(), Window::getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	unbindFramebuffer();
 }

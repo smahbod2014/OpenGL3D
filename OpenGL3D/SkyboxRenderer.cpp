@@ -78,8 +78,8 @@ void SkyboxRenderer::render(Camera* camera)
 	V[3][0] = 0.0f;
 	V[3][1] = 0.0f;
 	V[3][2] = 0.0f;
-	currentRotation += rotationSpeed * Window::getDelta() / 100.0f;
-	V = V * glm::rotate(currentRotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	currentRotation += rotationSpeed * Window::getDelta();
+	V = V * glm::rotate(glm::radians(currentRotation), glm::vec3(0.0f, 1.0f, 0.0f));
 	shader->setUniformMatrix4("V", V);
 	glBindVertexArray(cube->m_Vao);
 	glEnableVertexAttribArray(0);

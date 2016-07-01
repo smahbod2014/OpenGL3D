@@ -71,7 +71,8 @@ void Model::loadFromFile(const std::string& filepath)
 	
 	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate
 											 | aiProcess_GenSmoothNormals
-											 | aiProcess_FlipUVs);
+											 | aiProcess_FlipUVs
+											 | aiProcess_CalcTangentSpace);
 
 	if (!scene)
 	{
@@ -90,6 +91,8 @@ void Model::loadFromFile(const std::string& filepath)
 		const aiVector3D& pos = model->mVertices[i];
 		const aiVector3D& normal = model->mNormals[i];
 		const aiVector3D& texCoord = model->HasTextureCoords(0) ? model->mTextureCoords[0][i] : aiZeroVector;
+		const aiVector3D& tangent = model->HasTangentsAndBitangents() ? model->mTangents[i] : aiZeroVector;
+		const aiVector3D& bitangent = model->HasTangentsAndBitangents() ? model->mBitangents[i] : aiZeroVector;
 
 		vertices.push_back(VertexData());
 
@@ -98,6 +101,8 @@ void Model::loadFromFile(const std::string& filepath)
 		memcpy(&vdRef.vertex, &pos, 12);
 		memcpy(&vdRef.uv, &texCoord, 8);
 		memcpy(&vdRef.normal, &normal, 12);
+		memcpy(&vdRef.tangent, &tangent, 12);
+		memcpy(&vdRef.bitangent, &bitangent, 12);
 	}
 	
 	for (unsigned int i = 0; i < model->mNumFaces; i++)
@@ -174,14 +179,20 @@ void Model::generate(const std::vector<VertexData>& vertices, const std::vector<
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, vertex));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, uv));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, normal));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_TRUE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, tangent));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_TRUE, sizeof(VertexData), (const GLvoid*)offsetof(VertexData, bitangent));
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
+	glDisableVertexAttribArray(4);
 
 	glGenBuffers(1, &m_Ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ibo);

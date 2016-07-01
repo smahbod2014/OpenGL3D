@@ -57,19 +57,19 @@ void PostProcessing::end(GLuint renderTexture)
 	postprocessingShader->unbind();
 
 	glBindVertexArray(0);
-	glEnableVertexAttribArray(0);
+	glDisableVertexAttribArray(0);
 	glEnable(GL_DEPTH_TEST);
 }
 
 void PostProcessing::doPostProcessing(GLuint targetTexture)
 {
-	GLuint result;
+	GLuint result = targetTexture;
 	start();
 	//stage 1: horizontal blur
-	result = horizontalBlur->render(targetTexture);
+	//result = horizontalBlur->render(result);
 	//stage 2: vertical blur
-	result = verticalBlur->render(result);
+	//result = verticalBlur->render(result);
 	//stage 3: contrast change
-	result = contrastChanger->render(result);
+	//result = contrastChanger->render(result);
 	end(result);
 }
