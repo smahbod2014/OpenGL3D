@@ -69,7 +69,7 @@ public:
 		camera->translate(glm::vec3(5, 5, 10));
 		//camera->rotate(glm::vec3(0, 1, 0), -90);
 		renderer = new Renderer();
-		dLight = new DirectionalLight(glm::vec3(-1, -0.5, 0), glm::vec3(0.3, 0.3, 0.3), 100);
+		dLight = new DirectionalLight(glm::vec3(-1, -0.5, 0), glm::vec3(1, 1, 1), 100);
 		renderer->loadDirectionalLight(dLight);
 		renderer->loadClipPlane(0, -1, 0, 15);
 
